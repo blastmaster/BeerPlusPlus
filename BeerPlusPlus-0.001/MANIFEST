@@ -1,0 +1,6 @@
+LICENSE
+MANIFEST
+META.yml
+Makefile.PL
+dist.ini
+lib/BeerPlusPlus.pm
