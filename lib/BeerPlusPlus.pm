@@ -10,6 +10,13 @@ plugin "TagHelpers";
 
 get '/' => 'index';
 
+post '/welcome' => sub {
+    my $self = shift;
+    my $user = $self->param('user');
+    my $pass = $self->param('pass');
+    $self->render(text => "$user $pass");
+};
+
 app->start;
 
 __DATA__
@@ -25,6 +32,7 @@ Hello, World!
 %=form_for '/welcome' => (method => 'POST') => begin
 %=text_field 'user' 
 %=password_field 'pass'
+%=submit_button 'login', id => 'login'
 %end
 </body>
 </html>
