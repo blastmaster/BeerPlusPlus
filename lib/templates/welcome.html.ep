@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<head>
+<title>BeerPlusPlus</title>
+</head>
+<body>
+<div> Hello, <%= param 'user' %> </div>
+<div>
+%= form_for '/increment' => (method => 'POST') => begin
+%= submit_button '++', id => 'inc'
+%end
+</div>
+<div>
+Current counter: <%= $self->session->{counter} %>
+<div>
+%= link_to Stats => '/statistics'
+</div>
+</body>
+</html>
