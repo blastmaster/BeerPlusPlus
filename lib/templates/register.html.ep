@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head><title>BeerPlusPlus</title></head>
+<body>
+<div>
+%= form_for '/register' => (method => 'POST') => begin
+%= input_tag 'name', type => 'text'
+%= password_field 'passwd', id => 'first'
+%= password_field 'passwd2', id => 'confrim'
+%= submit_button 'register', id => 'regbut'
+%end
+</div>
+%= javascript begin
+var button = document.getElementById('regbut');
+button.onclick = function() {
+alert(alo);
+var firstpw = document.getElementById('first');
+var secpw = document.getElementById('confirm');
+alert(firstpw.value());
+};
+%end
+</body>
+</html>

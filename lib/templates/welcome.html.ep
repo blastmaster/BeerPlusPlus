@@ -3,7 +3,8 @@
 <title>BeerPlusPlus</title>
 </head>
 <body>
-<div> Hello, <%= param 'user' %> </div>
+    <div><h2>Tek matte, <%= session 'user' %></h2></div>
+    <div><h2>Shal met</h2></div>
 <div>
 %= form_for '/increment' => (method => 'POST') => begin
 %= submit_button '++', id => 'inc'
@@ -13,6 +14,9 @@
 Current counter: <%= $self->session->{counter} %>
 <div>
 %= link_to Stats => '/statistics'
+</div>
+<div>
+    %= link_to Logout => '/logout'
 </div>
 </body>
 </html>
