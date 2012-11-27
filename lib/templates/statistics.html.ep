@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>BeerPlusPlus</title></head>
+<body>
+<div><p>
+Here were your stats, <%= $self->session->{user} %>
+</p></div>
+<div><p>
+Your current counter: <%= $self->session->{counter} %>
+</p></div>
+</body>
+<html>
