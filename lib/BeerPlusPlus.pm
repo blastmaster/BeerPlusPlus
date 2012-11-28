@@ -32,19 +32,33 @@ helper init => sub {
     my $self = shift;
     $self->res->headers->cache_control('max-age=1, no_cache');
     my $user = $self->session->{user};
-    return 0 unless -f "foo/".$user.".json";
-    my $json = Mojo::JSON->new;
-    open my $fh, '<', "foo/".$user.".json" || die qq/cannot open $!/;
+    my $hash = $self->json2hash($user);
+    return $hash;
+};
+
+helper json2hash => sub {
+    my $self = shift;
+    my $filename = shift;
+    open my $fh, '<', 'foo/'.$filename.'.json' or die qq/cannot open $!/;
     $/ = undef;
     my $data = <$fh>;
     close $fh;
-    my $hash = $json->decode($data);
-    return $hash;
+    my $json = Mojo::JSON->new;
+    my $hashref = $json->decode($data);
+    return $hashref;
+};
+
+helper get_users => sub {
+    my $self = shift;
+    my $ref = $self->json2hash('users');
+    my @userlist = @{ $ref->{users} };
+    return  wantarray ? @userlist : \@userlist;
 };
 
 helper auth => sub {
     my $self = shift;
-    return 1 if $self->session->{user} ~~ [qw(blastmaster foo eddy)] &&
+    my @users = $self->get_users;
+    return 1 if $self->session->{user} ~~ @users &&
     $self->session->{pass} eq  $self->session->{expected_pass};
 };
 
