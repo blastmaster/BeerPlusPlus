@@ -13,11 +13,6 @@ use Data::Dumper;
 post '/login' => sub {
     my $self = shift;
     my $user = $self->param('user');
-    my $session = Mojolicious::Sessions->new;
-    $session->cookie_name('just_drinking');
-    $session->default_expiration(120);
-    $session->cookie_path('/foo');
-    $session = $session->secure(1);
     my $pass = sha1_base64($self->param('pass'));
     $self->session(user => $user);
     $self->session(pass => $pass);
@@ -32,23 +27,10 @@ get '/register' => sub {
     $self->render(controller => 'register');
 };
 
-post '/register' => sub {
-    my $self = shift;
-    say qq/[debug] in post register/;
-    say Dumper($self->param);
-    say $self->param('name');
-    return 0;
-};
-
-helper auth => sub {
-    my $self = shift;
-    return 1 if $self->session->{user} ~~ [qw(blastmaster foo bar)] &&
-    $self->session->{pass} eq  $self->session->{expected_pass};
-};
-
 # init registered user data
 helper init => sub {
     my $self = shift;
+    $self->res->headers->cache_control('max-age=1, no_cache');
     my $user = $self->session->{user};
     return 0 unless -f "foo/".$user.".json";
     my $json = Mojo::JSON->new;
@@ -57,18 +39,29 @@ helper init => sub {
     my $data = <$fh>;
     close $fh;
     my $hash = $json->decode($data);
-    say qq/[debug] in init/;
-    say Dumper($hash);
     return $hash;
+};
+
+helper auth => sub {
+    my $self = shift;
+    return 1 if $self->session->{user} ~~ [qw(blastmaster foo eddy)] &&
+    $self->session->{pass} eq  $self->session->{expected_pass};
+};
+
+
+helper check => sub {
+    my $self = shift;
+    my $newpw = shift;
+    $self->render(text => qq/come on .../) if (length($newpw) < 8);
+    return 0;
 };
 
 helper persist => sub {
     my $self = shift;
     my $user = $self->session->{user};
     my $json = Mojo::JSON->new;
+    delete $self->session->{expected_pass};
     my $data = $json->encode($self->session);
-    say qq/[debug] in persist/;
-    say Dumper($data);
     open my $fh, '>', "foo/".$user.".json" || die qq/cannot open $!/;
     print {$fh} $data;
     close $fh;
@@ -90,17 +83,28 @@ get '/statistics' => sub {
 
 get '/logout' => sub {
     my $self = shift;
-    say qq/[debug] in logout/;
-    say Dumper($self->session);
     delete $self->session->{expected_pass};
     $self->persist;
-    delete $self->session->{user};
-    delete $self->session->{pass};
-    delete $self->session->{counter};
+    %{ $self->session } = {};
+    $self->session(expires => 1);
     $self->render(text => 'kree sha!<br/>logging out ...');
 };
 
+get '/chpw' => sub { shift->render('register'); };
+
 get '/welcome' => sub { shift->render(controller => 'welcome'); };
+
+post '/register' => sub {
+    my $self = shift;
+    return 0 if $self->param('passwd') ne $self->param('passwd2');
+    $self->check($self->param('passwd'), $self->param('passwd2'));
+    my $newph = sha1_base64($self->param('passwd'));
+    $self->session->{pass} = $newph;
+    $self->persist;
+    my $hash = $self->init;
+    $self->session->{expected_pass} = $hash->{pass};
+    $self->redirect_to('/welcome');
+};
 
 post '/increment' => sub {
     my $self = shift;
@@ -125,9 +129,6 @@ __DATA__
 %=password_field 'pass'
 %=submit_button 'login', id => 'login'
 %end
-</div>
-<div>
-%= link_to Register => '/register'
 </div>
 </body>
 </html>

@@ -18,5 +18,8 @@ Current counter: <%= $self->session->{counter} %>
 <div>
     %= link_to Logout => '/logout'
 </div>
+<div>
+    %= link_to "Change Password" => '/chpw'
+</div>
 </body>
 </html>
