@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <head><title>BeerPlusPlus</title></head>
 <body>
-<div>
+<div id=2>
 %= form_for '/register' => (method => 'POST') => begin
 %= password_field 'passwd', id => 'first'
 %= password_field 'passwd2', id => 'confrim'
 %= submit_button 'change', id => 'regbut'
 %end
+</div>
 </body>
 </html>

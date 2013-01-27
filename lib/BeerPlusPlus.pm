@@ -6,8 +6,6 @@ use feature "say";
 use Digest::SHA1 qw(sha1_base64);
 use Mojolicious::Lite;
 
-use Data::Dumper;
-
 # ABSTRACT: first steps to an application which manage the beer storage
 
 post '/login' => sub {
@@ -79,6 +77,7 @@ helper persist => sub {
     open my $fh, '>', "foo/".$user.".json" || die qq/cannot open $!/;
     print {$fh} $data;
     close $fh;
+    return 0;
 };
 
 get '/' => 'index';
@@ -99,7 +98,7 @@ get '/logout' => sub {
     my $self = shift;
     delete $self->session->{expected_pass};
     $self->persist;
-    %{ $self->session } = {};
+    %{ $self->session } = ();
     $self->session(expires => 1);
     $self->render(text => 'kree sha!<br/>logging out ...');
 };
@@ -123,7 +122,10 @@ post '/register' => sub {
 post '/increment' => sub {
     my $self = shift;
     $self->session->{counter}++;
-    $self->redirect_to('welcome');
+    my $tmp = $self->session->{expected_pass};
+    $self->persist;
+    $self->session(expected_pass => $tmp);
+    $self->redirect_to('/welcome');
 };
 
 app->start;
@@ -137,7 +139,7 @@ __DATA__
 <title>BeerPlusPlus</title>
 </head>
 <body>
-<div>
+<div id=1>
 %=form_for '/login' => (method => 'POST') => begin
 %=text_field 'user'
 %=password_field 'pass'
