@@ -6,6 +6,8 @@ use feature "say";
 use Digest::SHA1 qw(sha1_base64);
 use Mojolicious::Lite;
 
+no if $] >= 5.018, warnings => "experimental::smartmatch";
+
 # ABSTRACT: first steps to an application which manage the beer storage
 
 post '/login' => sub {
@@ -37,6 +39,7 @@ helper init => sub {
 helper json2hash => sub {
     my $self = shift;
     my $filename = shift;
+    # put more error handling instead of just dying
     open my $fh, '<', 'foo/'.$filename.'.json' or die qq/cannot open $!/;
     $/ = undef;
     my $data = <$fh>;
@@ -48,8 +51,8 @@ helper json2hash => sub {
 
 helper get_users => sub {
     my $self = shift;
-    my $ref = $self->json2hash('users');
-    my @userlist = @{ $ref->{users} };
+    my @userlist = <../lib/foo/*.json>;
+    @userlist = grep { s/.*(?<=\/)(\w+)\.json/$1/ } @userlist;
     return  wantarray ? @userlist : \@userlist;
 };
 
