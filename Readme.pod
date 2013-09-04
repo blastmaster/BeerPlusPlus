@@ -1,0 +1,31 @@
+=pod
+
+=head1 NAME
+
+BeerPlusPlus - Simple beer storage application
+
+=head1 INSTALLATION
+
+Using Dist::Zilla:
+
+Install dependencies:
+
+    dzil listdeps | cpanm
+
+Building, testing and installing:
+
+    dzil build
+    dzil test
+    dzil install
+
+=head1 USAGE
+
+Run application on Mojolicious test server available at localhost:3000
+
+    morbo BeerPlusPlus.pm
+
+Create a new user
+
+    ./create_user.pl <username>
+
+=cut
