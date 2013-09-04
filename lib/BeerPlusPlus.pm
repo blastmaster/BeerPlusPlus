@@ -19,8 +19,6 @@ post '/login' => sub {
     # FIXME
     # $hash can be undef
     my $hash = $self->init;
-    $self->session(counter => $hash->{counter});
-    $self->session(expected_pass => $hash->{pass});
     $self->redirect_to('/welcome');
 };
 
@@ -36,6 +34,8 @@ helper init => sub {
     my $user = $self->session->{user};
     if ( $self->user_exists($user) ) {
         my $hash = $self->json2hash($user);
+        $self->session(counter => $hash->{counter});
+        $self->session(expected_pass => $hash->{pass});
         return $hash;
     }
     return undef;
@@ -89,11 +89,13 @@ helper persist => sub {
     my $self = shift;
     my $user = $self->session->{user};
     my $json = Mojo::JSON->new;
+    my $tmp = $self->session->{expected_pass};
     delete $self->session->{expected_pass};
     my $data = $json->encode($self->session);
     open my $fh, '>', "foo/".$user.".json" || die qq/cannot open $!/;
     print {$fh} $data;
     close $fh;
+    $self->session->{expected_pass} = $tmp;
     return 0;
 };
 
@@ -113,8 +115,8 @@ get '/statistics' => sub {
 
 get '/logout' => sub {
     my $self = shift;
-    delete $self->session->{expected_pass};
     $self->persist;
+    delete $self->session->{expected_pass};
     %{ $self->session } = ();
     $self->session(expires => 1);
     $self->render(text => 'kree sha!<br/>logging out ...');
@@ -131,17 +133,14 @@ post '/register' => sub {
     my $newph = sha1_base64($self->param('passwd'));
     $self->session->{pass} = $newph;
     $self->persist;
-    my $hash = $self->init;
-    $self->session->{expected_pass} = $hash->{pass};
+    $self->init;
     $self->redirect_to('/welcome');
 };
 
 post '/increment' => sub {
     my $self = shift;
     $self->session->{counter}++;
-    my $tmp = $self->session->{expected_pass};
     $self->persist;
-    $self->session(expected_pass => $tmp);
     $self->redirect_to('/welcome');
 };
 
