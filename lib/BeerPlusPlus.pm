@@ -16,6 +16,8 @@ post '/login' => sub {
     my $pass = sha1_base64($self->param('pass'));
     $self->session(user => $user);
     $self->session(pass => $pass);
+    # FIXME
+    # $hash can be undef
     my $hash = $self->init;
     $self->session(counter => $hash->{counter});
     $self->session(expected_pass => $hash->{pass});
@@ -32,8 +34,11 @@ helper init => sub {
     my $self = shift;
     $self->res->headers->cache_control('max-age=1, no_cache');
     my $user = $self->session->{user};
-    my $hash = $self->json2hash($user);
-    return $hash;
+    if ( $self->user_exists($user) ) {
+        my $hash = $self->json2hash($user);
+        return $hash;
+    }
+    return undef;
 };
 
 helper json2hash => sub {
@@ -51,16 +56,25 @@ helper json2hash => sub {
 
 helper get_users => sub {
     my $self = shift;
+    # path to user files should be read from config
     my @userlist = <../lib/foo/*.json>;
     @userlist = grep { s/.*(?<=\/)(\w+)\.json/$1/ } @userlist;
     return  wantarray ? @userlist : \@userlist;
 };
 
+helper user_exists => sub {
+    my ($self, $username) = @_;
+    my %users = map { $_ => 1 } ( $self->get_users );
+    return 1 if (exists $users{$username});
+    return 0;
+};
+
+
 helper auth => sub {
     my $self = shift;
-    my @users = $self->get_users;
-    return 1 if $self->session->{user} ~~ @users &&
-    $self->session->{pass} eq  $self->session->{expected_pass};
+    my $user = $self->session->{user};
+    return 1 if $self->user_exists($user) &&
+    $self->session->{pass} eq $self->session->{expected_pass};
 };
 
 
