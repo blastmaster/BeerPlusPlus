@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+<title>BeerPlusPlus</title>
+</head>
+<body>
+    <div id=5><h2>Tek matte, <%= session 'user' %></h2></div>
+    <div id=6><h2>Shal met</h2></div>
+<div id=7>
+%= form_for '/increment' => (method => 'POST') => begin
+%= submit_button '++', id => 'inc'
+%end
+</div>
+<div id=8>
+Current counter: <%= $self->session->{counter} %>
+<div id=9>
+%= link_to Stats => '/statistics'
+</div>
+<div id=10>
+    %= link_to Logout => '/logout'
+</div>
+<div id=11>
+    %= link_to "Change Password" => '/chpw'
+</div>
+</body>
+</html>
