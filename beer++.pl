@@ -1,9 +1,12 @@
-package BeerPlusPlus;
+#! /usr/bin/env perl
+
 use strict;
 use warnings;
 
-use feature "say";
+use feature 'say';
 
+
+# TODO replace with SHA->new(1)
 use Digest::SHA1 qw(sha1_base64);
 use Mojolicious::Lite;
 
@@ -208,4 +211,5 @@ Permission denied!
 <div id="footer">
 	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
 </div>
+
 
