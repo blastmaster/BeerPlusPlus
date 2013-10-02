@@ -1,12 +1,28 @@
-<!DOCTYPE html>
-<head><title>BeerPlusPlus</title></head>
-<body>
-<div id=2>
+% layout 'basic', subtitle => 'change password';
+<!--span class="banner" style="font-size: 7.4em; line-height: 50%">change password</span-->
+<br/>
 %= form_for '/register' => (method => 'POST') => begin
-%= password_field 'passwd', id => 'first'
-%= password_field 'passwd2', id => 'confrim'
-%= submit_button 'change', id => 'regbut'
+	<table style="margin-top: 30px">
+		<tr>
+			<td><label for="passwd">password</label></td>
+			<td><label for="passwd2">confirmation</label></td>
+		</tr>
+		<tr>
+			<td><%=password_field 'passwd', id => 'first' %></td>
+			<td><%=password_field 'passwd2', id => 'confirm' %></td>
+		</tr>
+		<!--tr>
+			<td/>
+			<td><%= submit_button '++', id => 'regbut', class => 'banner pp', title => 'submit' %></td>
+		</tr-->
+	</table>
+	%= submit_button 'change', id => 'regbut', class => 'banner pp', title => 'submit'
 %end
+<div id="footer">
+	<span style="float: left">
+		<%=link_to 'home' => '/welcome' %> |
+		<%=link_to 'statistics' => '/statistics' %>
+	</span>
+	<span style="float: right"><%=link_to 'logout' => '/logout' %> |</span>
 </div>
-</body>
-</html>
+

@@ -1,25 +1,25 @@
-<!DOCTYPE html>
-<head>
-<title>BeerPlusPlus</title>
-</head>
-<body>
-    <div id=5><h2>Tek matte, <%= session 'user' %></h2></div>
-    <div id=6><h2>Shal met</h2></div>
-<div id=7>
-%= form_for '/increment' => (method => 'POST') => begin
-%= submit_button '++', id => 'inc'
-%end
+% layout 'basic', subtitle => "tec'ma'te";
+<span class="banner">Tec'ma'te</span>
+<!--div><h2>Shal met</h2></div-->
+%=form_for '/increment' => (method => 'POST') => begin
+<table>
+	<tr>
+		<td width="50%"><%= session 'user' %>'s count</td>
+		<!--td><%= $self->session->{counter} %></td-->
+		<td width="50%"><%= session 'counter' %></td>
+	</tr>
+	<tr>
+		<td width="50%"/>
+		<!--td width="50%"><%=submit_button '++', id => 'inc', class => 'banner', onclick => 'alert("Shal Met!")' %></td-->
+		<td width="50%"><%=submit_button '++', id => 'inc', class => 'banner' %></td>
+	</tr>
+</table>
+%=end
+<div id="footer">
+	<span style="float: left">
+		<%=link_to 'statistics' => '/statistics' %> |
+		<%=link_to 'change password' => '/chpw' %>
+	</span>
+	<span style="float: right"><%=link_to 'logout' => '/logout' %> |</span>
 </div>
-<div id=8>
-Current counter: <%= $self->session->{counter} %>
-<div id=9>
-%= link_to Stats => '/statistics'
-</div>
-<div id=10>
-    %= link_to Logout => '/logout'
-</div>
-<div id=11>
-    %= link_to "Change Password" => '/chpw'
-</div>
-</body>
-</html>
+

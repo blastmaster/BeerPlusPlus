@@ -1,12 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head><title>BeerPlusPlus</title></head>
-<body>
-<div id=3><p>
-Here were your stats, <%= $self->session->{user} %>
-</p></div>
-<div id=4><p>
-Your current counter: <%= $self->session->{counter} %>
-</p></div>
-</body>
-<html>
+% layout 'basic', subtitle => 'statistics';
+<span class="banner">statistics</span>
+<div style="height: 130px; overflow: auto">
+	<table>
+		<tr>
+			<td width="85%"><%= session 'user' %></td>
+			<td width="15%" align="right"><%= session 'counter' %></td>
+		</tr>
+		<tr>
+			<td width="100%"><hr/></td>
+		</tr>
+	<!--table width="100%" height="100px"-->
+		<% for my $user (keys %{$stats}) { %>
+		<tr>
+			<td width="85%"><%= $user %></td>
+			<td width="15%" align="right"><%= $stats->{$user} %></td>
+		</tr>
+		<% } %>
+	</table>
+</div>
+<div id="footer">
+	<span style="float: left">
+		<%=link_to 'home' => '/welcome' %> |
+		<%=link_to 'change password' => '/chpw' %>
+	</span>
+	<span style="float: right"><%=link_to 'logout' => '/logout' %> |</span>
+</div>
+

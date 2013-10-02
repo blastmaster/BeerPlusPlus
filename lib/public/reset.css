@@ -1,0 +1,15 @@
+/**
+ * reset all HTML elements
+ *
+ * TODO improve reset stylesheet considering web, e.g.
+ *      http://developer.yahoo.com/yui/reset
+ */
+html, body, ul, ol, li, p, blockquote, q,
+h1, h2, h3, h4, h5, h6, fieldset, legend,
+form, label, a, div, img, dd, dt, dl, input, span, img
+{
+	margin  : 0px;
+	padding : 0px;
+	border  : 0px;
+}
+

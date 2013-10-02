@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>beer++ | <%= $subtitle %></title>
+		<!-- %=stylesheet 'style.css' -->
+		<link href='style.css' rel='stylesheet' type='text/css' />
+	</head>
+	<body>
+		<div id="box">
+			<%= content %>
+		</div>
+		<div style="clear: both"/>
+	</body>
+</html>

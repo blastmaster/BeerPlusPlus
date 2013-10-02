@@ -1,0 +1,152 @@
+@import "reset.css";
+
+/*
+ * import google's open web font
+ */
+@import "http://fonts.googleapis.com/css?family=Gruppo";
+
+
+body {
+	color : #A7B2B5;
+	font-family : sans-serif;
+	font-size : 2em;
+
+	/*
+	 * graphic taken from
+	 * http://www.webplace.com.au/templates/protostar/images/bg-footer.png
+	 */
+	background: url(background.png);
+}
+
+div#box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -150px;
+	margin-left: -250px;
+
+	width: 550px;
+	height: 300px;
+
+	font-family : 'Gruppo';
+}
+
+.banner {
+	font-family: 'Gruppo';
+	font-size: 4em;
+
+/*	color: #95D2DF;
+	text-shadow: 3px 3px #333, -1px -1px #AAA;*/
+
+	/**
+	 * inspired by
+	 * http://www.onlinecasinodemar.com/webdesign/xhtml-css/beeindruckende-effekte-mit-der-css-eigenschaft-text-shadow
+	 */
+	color: #374245;
+	text-shadow: -2px -2px #273235, 2px 2px #475255;
+}
+
+input.banner {
+	background: transparent;
+	border: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	padding: 0;
+	text-align: left;
+	margin: -30px 0;
+	/* fixing overlapping submit button */
+	z-index: 0;
+}
+
+/**
+ * inspired by
+ * http://www.elmastudio.de/programmierung/css/css-tipp-inputfelder-mit-css-box-shadow-und-gloweffekt
+ */
+input {
+	font-size: 0.8em;
+	width: 95%;/*200px;*/
+/*	margin:30px 30px 40px;*/
+	margin: 0;
+	padding: 10px 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid #778285;
+	-webkit-box-shadow: inset 0 0 4px 2px rgba(0,0,0, 0.1);
+	-moz-box-shadow: inset 0 0 4px 2px rgba(0,0,0, 0.1);
+	box-shadow: inset 0 0 4px 2px rgba(0,0,0, 0.1);
+
+	background-color : #A7B2B5;
+
+	/*
+	 * position must be set relative, due to
+	 * http://stackoverflow.com/questions/13091305/z-index-doesnt-work
+	 */
+	position: relative;
+	z-index: 1;
+}
+
+input:focus {
+	outline: 0;
+	border: 1px solid #95D2DF;
+	-webkit-box-shadow: 0 0 5px 4px rgba(36,184,194, 0.10);
+	-moz-box-shadow: 0 0 5px 4px rgba(36,184,194, 0.10);
+	box-shadow: 0 0 5px 4px rgba(36,184,194, 0.10);
+}
+
+table {
+	width : 100%;
+}
+
+a {
+	color : #95D2DF;
+	font-size : 50%;
+	text-decoration : none;
+}
+
+/*label {
+	font-family : 'Gruppo';
+}*/
+
+.center {
+	width : 100%;
+	text-align : center;
+}
+
+#footer {
+	position : absolute;
+	bottom : 0;
+	width : 100%;
+}
+
+hr {
+	margin-top : 8px;
+	margin-bottom : 5px;
+	height : 1px;
+	width : 90%;
+	color : #333841;
+	background-color : #333841;
+	border : 0;
+}
+
+
+/*
+ * taken from
+ * http://css-tricks.com/custom-scrollbars-in-webkit
+ */
+
+::-webkit-scrollbar {
+	width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+	border-radius: 10px;
+}
+		 
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+
