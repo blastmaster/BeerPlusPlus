@@ -11,6 +11,8 @@ no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # ABSTRACT: first steps to an application which manage the beer storage
 
+my $DATADIR = 'foo';
+
 post '/login' => sub {
     my $self = shift;
     my $user = $self->param('user');
@@ -45,7 +47,7 @@ helper init => sub {
 helper json2hash => sub {
     my $self = shift;
     my $filename = shift;
-	my $path = "foo/$filename.json";
+	my $path = "$DATADIR/$filename.json";
     # TODO put more error handling instead of just dying
     open my $fh, '<', $path or die qq/cannot open $path: $!/;
     $/ = undef;
@@ -57,11 +59,14 @@ helper json2hash => sub {
 };
 
 helper get_users => sub {
-    my $self = shift;
-    # path to user files should be read from config
-    my @userlist = <../lib/foo/*.json>;
-    @userlist = grep { s/.*(?<=\/)(\w+)\.json/$1/ } @userlist;
-    return  wantarray ? @userlist : \@userlist;
+	my $self = shift;
+	# path to user files should be read from config
+#	my @userlist = <../lib/foo/*.json>;
+#	@userlist = grep { s/.*(?<=\/)(\w+)\.json/$1/ } @userlist;
+	my @userlist = map {
+		s/^$DATADIR\///; s/\.json$//; $_;
+	} glob "$DATADIR/*.json" or warn;
+	return wantarray ? @userlist : \@userlist;
 };
 
 helper user_exists => sub {
@@ -95,7 +100,7 @@ helper persist => sub {
     my $tmp = $self->session->{expected_pass};
     delete $self->session->{expected_pass};
     my $data = $json->encode($self->session);
-    open my $fh, '>', "foo/".$user.".json" || die qq/cannot open $!/;
+    open my $fh, '>', "$DATADIR/$user.json" || die qq/cannot open $!/;
     print {$fh} $data;
     close $fh;
     $self->session->{expected_pass} = $tmp;
@@ -120,8 +125,8 @@ get '/statistics' => sub {
     my $self = shift;
 	my $user = $self->session->{user};
 	my %statistics;
-	for my $userfile (glob "foo/*.json") {
-		my ($name) = $userfile =~ /foo\/(.+)\.json$/;
+	for my $userfile (glob "$DATADIR/*.json") {
+		my ($name) = $userfile =~ /$DATADIR\/(.+)\.json$/;
 		next if $name eq $user;
 
 		open FILE, '<', $userfile or die $!;
