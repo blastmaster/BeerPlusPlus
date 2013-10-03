@@ -19,6 +19,7 @@ my $DATADIR = 'foo';
 post '/login' => sub {
     my $self = shift;
     my $user = $self->param('user');
+	# FIXME http://onkeypress.blogspot.de/2011/07/perl-wide-character-in-subroutine-entry.html
     my $pass = sha1_base64($self->param('pass'));
     $self->session(user => $user);
     $self->session(pass => $pass);
@@ -65,10 +66,7 @@ helper get_users => sub {
 	my $self = shift;
 	# path to user files should be read from config
 #	my @userlist = <../lib/foo/*.json>;
-#	@userlist = grep { s/.*(?<=\/)(\w+)\.json/$1/ } @userlist;
-	my @userlist = map {
-		s/^$DATADIR\///; s/\.json$//; $_;
-	} glob "$DATADIR/*.json" or warn;
+	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
 	return wantarray ? @userlist : \@userlist;
 };
 
