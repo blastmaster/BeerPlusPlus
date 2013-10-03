@@ -7,7 +7,7 @@ use feature 'say';
 
 
 # TODO replace with SHA->new(1)
-use Digest::SHA1 qw(sha1_base64);
+use Digest::SHA qw(sha1_base64);
 use Mojolicious::Lite;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
