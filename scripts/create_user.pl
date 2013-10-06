@@ -16,6 +16,6 @@ my %new_user = (
 );
 my $json = Mojo::JSON->new;
 my $data = $json->encode(\%new_user);
-open my $fh, '>', "../lib/foo/".$username.".json" or die qq/cannot open $!/;
+open my $fh, '>', "foo/".$username.".json" or die qq/cannot open $!/;
 print {$fh} $data;
 close $fh;
