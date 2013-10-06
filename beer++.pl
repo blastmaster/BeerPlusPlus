@@ -172,42 +172,82 @@ post '/increment' => sub {
     $self->redirect_to('/welcome');
 };
 
+helper footer => sub {
+    my $self = shift;
+
+	if (shift eq 'only_login') {
+		my $login = $self->link_to(login => '/');
+		return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: right">$login |</span>
+</div>
+HTML
+	}
+
+	my %pages = (
+		'/welcome' => 'home',
+		'/statistics' => 'statistics',
+#		'/chpw' => 'change password'
+	);
+	my $current = $self->url_for('current');
+
+	my @links;
+	for my $path (keys %pages) {
+		next if $path eq $current;
+		push @links, $self->link_to($pages{$path} => $path);
+	}
+
+	my $links = join " |\n", @links;
+	my $logout = $self->link_to(logout => '/logout');
+	return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: left">
+		$links
+	</span>
+	<span style="float: right">$logout |</span>
+</div>
+HTML
+};
+
 app->start;
 
 __DATA__
 
 @@ index.html.ep
 % layout 'basic', subtitle => 'increment your blood alcohol level';
-%=form_for '/login' => (method => 'POST') => begin
-	<table>
-		<tr>
-			<td class="banner">beer</td>
-		</tr>
-		<tr>
-			<td><%=text_field 'user', id => 'user' %></td>
-			<td><%=password_field 'pass', id => 'pass' %></td>
-		</tr>
-		<tr>
-			<td/>
-			<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
-		</tr>
-	</table>
-%=end
+<div id="header" class="banner">beer</div>
+<div id="content">
+	%=form_for '/login' => (method => 'POST') => begin
+		<table>
+			<colgroup>
+				<col width="50%"/>
+				<col width="50%"/>
+			</colgroup>
+			<!--tr>
+				<td class="banner">beer</td>
+			</tr-->
+			<tr>
+				<td><%=text_field 'user', id => 'user' %></td>
+				<td><%=password_field 'pass', id => 'pass' %></td>
+			</tr>
+			<tr>
+				<td/>
+				<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
+			</tr>
+		</table>
+	%=end
+</div>
 
 @@ logout.html.ep
 % layout 'basic';
-<p class="banner center"><%= $byebye %>!</p>
-<div id="footer">
-	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
-</div>
+<div id="header" class="banner"><%= $byebye %>!</div>
+%= footer 'only_login'
 
 @@ denied.html.ep
 % layout 'basic';
-<span class="banner center" style="font-size: 3.7em">Rin'tel'noc!</span>
-<br/>
-Permission denied!
-<div id="footer">
-	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
+<div id="header" class="banner" style="font-size: 3.7em">Rin'tel'noc!</div>
+<div id="content">
+	Permission denied!
 </div>
-
+%= footer 'only_login'
 
