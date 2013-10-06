@@ -14,7 +14,7 @@ no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # ABSTRACT: first steps to an application which manage the beer storage
 
-my $DATADIR = 'foo';
+my $DATADIR = 'users';
 
 post '/login' => sub {
     my $self = shift;
@@ -146,7 +146,6 @@ get '/logout' => sub {
     $self->session(expires => 1);
 	my @byebyes = ('kree sha', 'lek tol');
 	my $byebye = $byebyes[rand @byebyes];
-#	$self->render(text => "$byebye!<br/>logging out ...");
 	$self->render(controller => 'logout', byebye => $byebye, subtitle => $byebye);
 };
 
