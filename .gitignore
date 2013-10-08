@@ -2,4 +2,5 @@
 .*.bak
 .*.swn
 .*.swo
+.*.tar.gz
 .note
