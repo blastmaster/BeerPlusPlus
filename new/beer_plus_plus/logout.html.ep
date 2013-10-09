@@ -1,0 +1,6 @@
+% layout 'basic';
+<p class="banner center"><%= $byebye %>!</p>
+<div id="footer">
+	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
+</div>
+

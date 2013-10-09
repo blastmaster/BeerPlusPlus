@@ -1,0 +1,25 @@
+% layout 'basic', subtitle => "tec'ma'te";
+<span class="banner">Tec'ma'te</span>
+<!--div><h2>Shal met</h2></div-->
+%=form_for '/increment' => (method => 'POST') => begin
+<table>
+	<tr>
+		<td width="50%"><%= session 'user' %>'s count</td>
+		<!--td><%= $self->session->{counter} %></td-->
+		<td width="50%"><%= session 'counter' %></td>
+	</tr>
+	<tr>
+		<td width="50%"/>
+		<!--td width="50%"><%=submit_button '++', id => 'inc', class => 'banner', onclick => 'alert("Shal Met!")' %></td-->
+		<td width="50%"><%=submit_button '++', id => 'inc', class => 'banner' %></td>
+	</tr>
+</table>
+%=end
+<div id="footer">
+	<span style="float: left">
+		<%=link_to 'statistics' => '/statistics' %> |
+		<%=link_to 'change password' => '/chpw' %>
+	</span>
+	<span style="float: right"><%=link_to 'logout' => '/logout' %> |</span>
+</div>
+

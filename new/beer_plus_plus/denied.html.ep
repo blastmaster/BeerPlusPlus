@@ -1,0 +1,9 @@
+% layout 'basic';
+<span class="banner center" style="font-size: 3.7em">Rin'tel'noc!</span>
+<br/>
+Permission denied!
+<div id="footer">
+	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
+</div>
+
+
