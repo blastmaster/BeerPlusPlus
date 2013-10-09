@@ -20,12 +20,26 @@
 				<col width="25%"/>
 			</colgroup>
 			<% for my $user (keys %{$stats}) { %>
-			<tr>
-				<td><%= $user %></td>
-				<td align="right"><%= $stats->{$user} %></td>
-			</tr>
+				<% next if $user eq 'guest'; %>
+				<tr>
+					<td><%= $user %></td>
+					<td align="right"><%= $stats->{$user} %></td>
+				</tr>
 			<% } %>
 		</table>
+		<% if (defined $stats->{guest}) { %>
+			<hr/>
+			<table>
+				<colgroup>
+					<col width="75%"/>
+					<col width="25%"/>
+				</colgroup>
+				<tr>
+					<td>guest</td>
+					<td align="right"><%= $stats->{guest} %></td>
+				</tr>
+			</table>
+		<% } %>
 	</div>
 </div>
 %= footer
