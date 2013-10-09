@@ -90,7 +90,7 @@ div#header {
 }
 
 div#content-scroll {
-	width  : 565px;
+	width  : 568px;
 	height : 135px; /* 160px */
 
 	margin-top : 10px;
@@ -213,6 +213,7 @@ hr {
  * http://css-tricks.com/custom-scrollbars-in-webkit
  */
 ::-webkit-scrollbar {
+	/* TODO right margin to fit native-scrollbar width */
 	margin-left : 3px;
 	width: 12px;
 }
