@@ -6,7 +6,6 @@ use warnings;
 use feature 'say';
 
 
-# TODO replace with SHA->new(1)
 use Digest::SHA qw(sha1_base64);
 use Mojolicious::Lite;
 
@@ -174,8 +173,9 @@ post '/increment' => sub {
 
 helper footer => sub {
     my $self = shift;
+	my $spec = shift;
 
-	if (shift eq 'only_login') {
+	if (defined $spec and $spec eq 'only_login') {
 		my $login = $self->link_to(login => '/');
 		return Mojo::ByteStream->new(<<HTML);
 <div id="footer">
