@@ -6,7 +6,6 @@ use warnings;
 use feature 'say';
 
 
-# TODO replace with SHA->new(1)
 use Digest::SHA qw(sha1_base64);
 use Mojolicious::Lite;
 
@@ -66,6 +65,7 @@ helper get_users => sub {
 	my $self = shift;
 	# path to user files should be read from config
 #	my @userlist = <../lib/foo/*.json>;
+	warn "datadir '$DATADIR' does not exist!" unless -d $DATADIR;
 	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
 	return wantarray ? @userlist : \@userlist;
 };
@@ -125,6 +125,7 @@ get '/denied' => sub {
 get '/statistics' => sub {
     my $self = shift;
 	my $user = $self->session->{user};
+
 	my %statistics;
 	for my $userfile (glob "$DATADIR/*.json") {
 		my ($name) = $userfile =~ /$DATADIR\/(.+)\.json$/;
@@ -133,7 +134,9 @@ get '/statistics' => sub {
 		open FILE, '<', $userfile or die $!;
 		my $hash = $self->json2hash($name);
 		close FILE or warn $!;
-		$statistics{$name} = $hash->{counter};
+
+		my $count = $hash->{counter};
+		$statistics{$name} = $count if $count;
 	}
     $self->render(controller => 'statistics', stats => \%statistics);
 };
@@ -171,42 +174,84 @@ post '/increment' => sub {
     $self->redirect_to('/welcome');
 };
 
+helper footer => sub {
+    my $self = shift;
+	my $spec = shift;
+
+	if (defined $spec and $spec eq 'only_login') {
+		my $login = $self->link_to(login => '/');
+		return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: right">$login |</span>
+</div>
+HTML
+	}
+
+	my %pages = (
+		'/welcome' => 'home',
+		'/statistics' => 'statistics',
+#		'/chpw' => 'change password',
+		'/rules.pdf' => 'rules'
+	);
+	my $current = $self->url_for('current');
+
+	my @links;
+	for my $path (keys %pages) {
+		next if $path eq $current;
+		push @links, $self->link_to($pages{$path} => $path);
+	}
+
+	my $links = join " |\n", @links;
+	my $logout = $self->link_to(logout => '/logout');
+	return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: left">
+		$links
+	</span>
+	<span style="float: right">$logout |</span>
+</div>
+HTML
+};
+
 app->start;
 
 __DATA__
 
 @@ index.html.ep
 % layout 'basic', subtitle => 'increment your blood alcohol level';
-%=form_for '/login' => (method => 'POST') => begin
-	<table>
-		<tr>
-			<td class="banner">beer</td>
-		</tr>
-		<tr>
-			<td><%=text_field 'user', id => 'user' %></td>
-			<td><%=password_field 'pass', id => 'pass' %></td>
-		</tr>
-		<tr>
-			<td/>
-			<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
-		</tr>
-	</table>
-%=end
+<div id="header" class="banner">beer</div>
+<div id="content" style="margin-top: 20px">
+	%=form_for '/login' => (method => 'POST') => begin
+		<table>
+			<colgroup>
+				<col width="50%"/>
+				<col width="50%"/>
+			</colgroup>
+			<!--tr>
+				<td class="banner">beer</td>
+			</tr-->
+			<tr>
+				<td><%=text_field 'user', id => 'user' %></td>
+				<td><%=password_field 'pass', id => 'pass' %></td>
+			</tr>
+			<tr>
+				<td/>
+				<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
+			</tr>
+		</table>
+	%=end
+</div>
 
 @@ logout.html.ep
 % layout 'basic';
-<p class="banner center"><%= $byebye %>!</p>
-<div id="footer">
-	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
-</div>
+<div id="header" class="banner"><%= $byebye %>!</div>
+%= footer 'only_login'
 
 @@ denied.html.ep
 % layout 'basic';
-<span class="banner center" style="font-size: 3.7em">Rin'tel'noc!</span>
-<br/>
-Permission denied!
-<div id="footer">
-	<span style="float: right"><%=link_to 'login' => '/' %> |</span>
+<div id="header" class="banner" style="font-size: 3.7em">Rin'tel'noc!</div>
+<div id="content">
+	Permission denied!
 </div>
-
+%= footer 'only_login'
 
