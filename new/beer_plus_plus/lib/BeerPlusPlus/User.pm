@@ -14,13 +14,14 @@ sub new { bless {}, shift }
 
 sub init
 {
-	say "in init";
 	my ($self, $user)  = @_;
-	say "user: $user";
 	if ( $self->user_exists($user) ) {
 		my $hash = $self->json2hash($user);
-		# $self->session(counter => $hash->{counter});
-		# $self->session(expected_pass => $hash->{pass});
+        p $hash;
+		while (my ($k, $v) = each %{$hash} ) {
+			say "k = $k\tv = $v";
+			$self->{$k} = $v;
+		}
 		return $hash;
 	}
 	return undef;
@@ -63,16 +64,21 @@ sub get_users
 
 sub persist
 {
-	my $self = shift;
-	my $user = $self->session->{user};
+	my ($self, $counter) = @_;
+	p $self;
+	my $user = $self->{user};
+	say "in persist counter: $counter";
+	my $pass = $self->{pass};
 	my $json = Mojo::JSON->new;
-	my $tmp = $self->session->{expected_pass};
-	delete $self->session->{expected_pass};
-	my $data = $json->encode($self->session);
+	my $data = $json->encode({
+							user	=> $user,
+							counter => $counter,
+							pass	=> $pass
+                        });
+    p $data;
 	open my $fh, '>', "$DATADIR/$user.json" || die "cannot open $!";
 	print {$fh} $data;
 	close $fh;
-	$self->session->{expected_pass} = $tmp;
 	return 0;
 }
 
