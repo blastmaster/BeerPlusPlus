@@ -26,6 +26,22 @@
 			</tr>
 			<% } %>
 		</table>
+		<hr/>
+		<table>
+			<colgroup>
+				<col width="75%"/>
+				<col width="25%"/>
+			</colgroup>
+			<% my $sum = 0; %>
+			<% for my $user (keys %{$stats}) { %>
+				<% $sum += $stats->{$user}; %>
+			<% } %>
+			<% $sum += session 'counter'; %>
+			<tr>
+				<td></td>
+				<td align="right"><%= $sum %></td>
+			</tr>
+		</table>
 	</div>
 </div>
 %= footer
