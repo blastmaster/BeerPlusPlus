@@ -65,6 +65,7 @@ helper get_users => sub {
 	my $self = shift;
 	# path to user files should be read from config
 #	my @userlist = <../lib/foo/*.json>;
+	warn "datadir '$DATADIR' does not exist!" unless -d $DATADIR;
 	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
 	return wantarray ? @userlist : \@userlist;
 };
@@ -124,6 +125,7 @@ get '/denied' => sub {
 get '/statistics' => sub {
     my $self = shift;
 	my $user = $self->session->{user};
+
 	my %statistics;
 	for my $userfile (glob "$DATADIR/*.json") {
 		my ($name) = $userfile =~ /$DATADIR\/(.+)\.json$/;
@@ -132,7 +134,9 @@ get '/statistics' => sub {
 		open FILE, '<', $userfile or die $!;
 		my $hash = $self->json2hash($name);
 		close FILE or warn $!;
-		$statistics{$name} = $hash->{counter};
+
+		my $count = $hash->{counter};
+		$statistics{$name} = $count if $count;
 	}
     $self->render(controller => 'statistics', stats => \%statistics);
 };
