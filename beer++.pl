@@ -221,7 +221,7 @@ __DATA__
 @@ index.html.ep
 % layout 'basic', subtitle => 'increment your blood alcohol level';
 <div id="header" class="banner">beer</div>
-<div id="content">
+<div id="content" style="margin-top: 20px">
 	%=form_for '/login' => (method => 'POST') => begin
 		<table>
 			<colgroup>
