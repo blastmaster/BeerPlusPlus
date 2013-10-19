@@ -17,14 +17,13 @@ sub index
 	my $username = $self->param('user') || '';
 	# FIXME http://onkeypress.blogspot.de/2011/07/perl-wide-character-in-subroutine-entry.html
 	my $pass = sha1_base64($self->param('pass')) || '';
+	my $userhash = $self->user->init($username);
+	$self->res->headers->cache_control('max-age=1, no_cache');
 	$self->session(user => $username);
 	$self->session(pass => $pass);
-	my $hash = $self->user->init($username);
-	$self->session(expected_pass => $hash->{pass});
-	p $hash;
-	# $self->res->headers->cache_control('max-age=1, no_cache');
-	# $self->render(controller => 'user', action => 'init');
-	 $self->redirect_to('/welcome');
+	$self->session(expected_pass => $userhash->{pass});
+	$self->session(counter => $userhash->{counter});
+	$self->redirect_to('/welcome');
 }
 
 sub is_auth
@@ -32,13 +31,14 @@ sub is_auth
 	my $self = shift;
 	p $self->session;
 	return 1 if $self->session->{user} && $self->session->{pass} eq $self->session->{expected_pass};
-	return $self->redirect_to('/welcome');
+	return $self->redirect_to('/index');
 }
 
 sub logout
 {
 	my $self = shift;
-	$self->persist;
+    my $counter = $self->session->{counter};
+	$self->user->persist($counter);
 	delete $self->session->{expected_pass};
 	%{ $self->session } = ();
 	$self->session(expires => 1);
