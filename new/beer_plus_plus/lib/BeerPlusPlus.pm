@@ -25,7 +25,11 @@ sub startup {
 	});
 
 	$r->any('/')->to('login#login');
+
+    $r->get('/index')->to('login#login');
+
 	$r->post('/login')->to('login#index');
+
 	$r->get('/logout')->to('login#logout');
 
 	$r = $r->under->to('login#is_auth');
@@ -34,9 +38,9 @@ sub startup {
 
 	$r->post('/increment' => sub {
 		my $self = shift;
-		p $self;
 		$self->session->{counter}++;
-		$self->user->persist;
+        my $counter = $self->session->{counter};
+		$self->user->persist($counter);
 		$self->redirect_to('/welcome');
 	});
 
@@ -46,26 +50,12 @@ sub startup {
 			return 0;
 	});
 
-	# $r = $r->add_condition('check' => sub {
-	# 	my $self = shift;
-	# 	return 1 if $self->auth;
-	# 	$self->render('denied', subtitle => "rin'tel'noc");
-	# 	return 0;
-	# });
-
 	$r->get('/denied' => sub {
 		my $self = shift;
 		$self->render(controller => 'denied', subtitle => "rin'tel'noc");
 	});
 
-
 	$r->get('/chpw' => sub { shift->render('register'); });
-
-
-
-
-	# Normal route to controller
-	# $r->get('/')->to('example#welcome');
 }
 
 1;
