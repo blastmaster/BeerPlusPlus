@@ -43,7 +43,7 @@ div#box {
 	font-family : 'Gruppo';
 
 	/* sidebar 110px, content 550px, scrollbar 15px */
-	width  : 110px + 550px + 15px;
+	width  : 675px;
 	height : 300px;
 
 	position    : absolute;
@@ -77,7 +77,7 @@ div#sidebar > div.item {
 
 div#page {
 	/* content 550px, scrollbar 15px */
-	width  : 550px + 15px;
+	width  : 565px;
 
 	float : right;
 }
@@ -90,7 +90,7 @@ div#header {
 }
 
 div#content-scroll {
-	width  : 565px;
+	width  : 568px;
 	height : 135px; /* 160px */
 
 	margin-top : 10px;
@@ -212,6 +212,7 @@ hr {
  * http://css-tricks.com/custom-scrollbars-in-webkit
  */
 ::-webkit-scrollbar {
+	/* TODO right margin to fit native-scrollbar width */
 	margin-left : 3px;
 	width: 12px;
 }
