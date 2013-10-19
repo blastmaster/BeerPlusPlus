@@ -6,11 +6,14 @@ use warnings;
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 
+use Cwd 'abs_path';
 use Mojo::JSON;
-use Digest::SHA1 qw(sha1_base64);
+use Digest::SHA qw(sha1_base64);
+use File::Basename;
 
-my $USERDIR = "../users";
-mkdir $USERDIR unless -d $USERDIR;
+my $USERDIR = abs_path(dirname($0) . "/../users");
+$USERDIR =~ s/^\Q$ENV{PWD}\E/./; # relative path
+mkdir $USERDIR and say "info: created directory $USERDIR" unless -d $USERDIR;
 
 sub create_users
 {
@@ -22,11 +25,18 @@ sub create_users
 			user => $username,
 			counter => 0,
 		);
+
 		my $json = Mojo::JSON->new;
 		my $data = $json->encode(\%new_user);
-		open my $fh, '>', "$USERDIR/$username".".json" or die qq/cannot open file $!/;
-		print {$fh} $data;
-		close $fh;
+
+		my $userfile = "$USERDIR/$username.json";
+		unless (-f $userfile) {
+			open my $fh, '>', $userfile or die qq/cannot open $userfile: $!/;
+			print {$fh} $data;
+			close $fh or warn "cannot close $userfile: $!";
+		} else {
+			say STDERR "warn: user '$username' already exists!";
+		}
 	}
 }
 
