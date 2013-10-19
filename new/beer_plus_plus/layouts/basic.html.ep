@@ -2,13 +2,19 @@
 <html>
 	<head>
 		<title>beer++ | <%= $subtitle %></title>
-		<!-- %=stylesheet 'style.css' -->
-		<link href='style.css' rel='stylesheet' type='text/css' />
+		%=stylesheet 'style.css'
+		<!--link href='style.css' rel='stylesheet' type='text/css' /-->
 	</head>
 	<body>
 		<div id="box">
-			<%= content %>
+			<div id="sidebar">
+				<!--div class="item">+1K</div-->
+				<!--div class="item">+1K</div-->
+			</div>
+			<div id="page">
+				<%= content %>
+			</div>
+			<div style="clear: both"/>
 		</div>
-		<div style="clear: both"/>
 	</body>
 </html>
