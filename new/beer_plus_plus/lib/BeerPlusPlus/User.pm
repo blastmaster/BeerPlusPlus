@@ -1,8 +1,30 @@
 package BeerPlusPlus::User;
-use Mojo::Base 'Mojolicious::Controller';
+# use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON;
+use Data::Printer;
+use feature "say";
 
 #FIXME path should be absolute and in config
-my $DATADIR = '../../users';
+my $DATADIR = '../users';
+
+#TODO: if tests run the relative path to user dir does not match need to replace
+# with a much smarter solution ... now!
+
+sub new { bless {}, shift }
+
+sub init
+{
+	say "in init";
+	my ($self, $user)  = @_;
+	say "user: $user";
+	if ( $self->user_exists($user) ) {
+		my $hash = $self->json2hash($user);
+		# $self->session(counter => $hash->{counter});
+		# $self->session(expected_pass => $hash->{pass});
+		return $hash;
+	}
+	return undef;
+}
 
 sub user_exists
 {
@@ -13,20 +35,6 @@ sub user_exists
 	return 0;
 }
 
-sub init
-{
-	my $self = shift;
-	$self->res->headers->cache_control('max-age=1, no_cache');
-	my $user = $self->session->{user};
-	if ( $self->user->user_exists($user) ) {
-		my $hash = $self->json2hash($user);
-		$self->session(counter => $hash->{counter});
-		$self->session(expected_pass => $hash->{pass});
-		return $hash;
-	}
-	return undef;
-}
-
 sub json2hash
 {
 	my $self = shift;
@@ -34,7 +42,7 @@ sub json2hash
 	my $path = "$DATADIR/$filename.json";
 	# TODO put more error handling instead of just dying
 	open my $fh, '<', $path or die qq/cannot open $path: $!/;
-	$/ = undef;
+	local $/ = undef;
 	my $data = <$fh>;
 	close $fh;
 	my $json = Mojo::JSON->new;
@@ -46,7 +54,10 @@ sub get_users
 {
 	my $self = shift;
 	#TODO path to user files should be read from config
+	say "exists!!!" if -d $DATADIR;
+	say "datadir: $DATADIR";
 	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
+	p @userlist;
 	return wantarray ? @userlist : \@userlist;
 }
 
