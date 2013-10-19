@@ -187,7 +187,8 @@ HTML
 	my %pages = (
 		'/welcome' => 'home',
 		'/statistics' => 'statistics',
-#		'/chpw' => 'change password'
+#		'/chpw' => 'change password',
+		'/rules.pdf' => 'rules'
 	);
 	my $current = $self->url_for('current');
 
