@@ -6,14 +6,14 @@ use warnings;
 use feature 'say';
 
 use FindBin;
-BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+BEGIN { unshift @INC, "$FindBin::Bin/lib" }
 
 use Cwd 'abs_path';
 use Mojo::JSON;
 use Digest::SHA qw(sha1_base64);
 use File::Basename;
 
-my $USERDIR = abs_path(dirname($0) . "/../users");
+my $USERDIR = abs_path(dirname($0) . "/users");
 $USERDIR =~ s/^\Q$ENV{PWD}\E/./; # relative path
 mkdir $USERDIR and say "info: created directory $USERDIR" unless -d $USERDIR;
 
