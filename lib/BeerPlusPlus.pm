@@ -6,6 +6,8 @@ use BeerPlusPlus::User;
 use Data::Printer;
 use feature "say";
 
+my $DATADIR = 'users';
+
 # This method will run once at server start
 sub startup {
 	my $self = shift;
@@ -14,7 +16,7 @@ sub startup {
 	# $self->plugin('PODRenderer');
 
 	# create user object
-	$self->helper(user => sub { state $user = BeerPlusPlus::User->new });
+	$self->helper(user => sub { state $user = BeerPlusPlus::User->new($DATADIR) });
 
 	$self->helper(footer => \&footer);
 

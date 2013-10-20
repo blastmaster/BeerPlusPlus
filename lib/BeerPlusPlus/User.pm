@@ -8,13 +8,14 @@ use File::Basename;
 use Data::Printer;
 use feature "say";
 
-#FIXME path should be absolute and in config
-my $DATADIR = 'users';
-
-#TODO: if tests run the relative path to user dir does not match need to replace
-# with a much smarter solution ... now!
-
-sub new { bless {}, shift }
+# TODO: passing hash to constructor
+# datadir => $datadir
+# username => $username
+sub new
+{
+    my ($class, $datadir) = @_;
+    return bless {datadir => $datadir}, $class;
+}
 
 sub init
 {
@@ -67,8 +68,8 @@ sub user_exists
 sub json2hash
 {
 	my $self = shift;
-	my $filename = shift;
-	my $path = "$DATADIR/$filename.json";
+	my $username = shift;
+	my $path = "$self->{datadir}/$username.json";
 	# TODO put more error handling instead of just dying
 	open my $fh, '<', $path or die qq/cannot open $path: $!/;
 	local $/ = undef;
@@ -83,7 +84,7 @@ sub get_users
 {
 	my $self = shift;
 	#TODO path to user files should be read from config
-	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
+	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$self->{datadir}/*.json";
 	return wantarray ? @userlist : \@userlist;
 }
 
@@ -142,7 +143,7 @@ sub persist
 							times   => \@times,
                         });
     p $data;
-	open my $fh, '>', "$DATADIR/$user.json" || die "cannot open $!";
+	open my $fh, '>', "$self->{datadir}/$user.json" || die "cannot open $!";
 	print {$fh} $data;
 	close $fh;
 	return 0;
