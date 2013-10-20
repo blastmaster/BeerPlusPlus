@@ -16,6 +16,8 @@ sub startup {
 	# create user object
 	$self->helper(user => sub { state $user = BeerPlusPlus::User->new });
 
+	$self->helper(footer => \&footer);
+
 	# Router
 	my $r = $self->routes;
 
@@ -57,5 +59,45 @@ sub startup {
 
 	$r->get('/chpw' => sub { shift->render('register'); });
 }
+
+sub footer {
+    my $self = shift;
+	my $spec = shift;
+
+	if (defined $spec and $spec eq 'only_login') {
+		my $login = $self->link_to(login => '/');
+		return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: right">$login |</span>
+</div>
+HTML
+	}
+
+	my %pages = (
+		'/welcome' => 'home',
+		'/statistics' => 'statistics',
+#		'/chpw' => 'change password',
+		'/rules.pdf' => 'rules'
+	);
+	my $current = $self->url_for('current');
+
+	my @links;
+	for my $path (keys %pages) {
+		next if $path eq $current;
+		push @links, $self->link_to($pages{$path} => $path);
+	}
+
+	my $links = join " |\n", @links;
+	my $logout = $self->link_to(logout => '/logout');
+	return Mojo::ByteStream->new(<<HTML);
+<div id="footer">
+	<span style="float: left">
+		$links
+	</span>
+	<span style="float: right">$logout |</span>
+</div>
+HTML
+}
+
 
 1;
