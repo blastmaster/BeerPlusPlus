@@ -24,4 +24,12 @@ Run application on Mojolicious test server available at localhost:3000
 
     morbo scripts/beer_plus_plus
 
+To run the application for development purposes start morbo as follows:
+
+    morbo -w templates/ -w public/ -w lib/ script/beer_plus_plus
+
+In this case morbo listens to changes on each specified directory plus the
+application script.
+
 =cut
+
