@@ -22,10 +22,6 @@ Building, testing and installing:
 
 Run application on Mojolicious test server available at localhost:3000
 
-    morbo BeerPlusPlus.pm
-
-Create a new user
-
-    ./create_user.pl <username>
+    morbo scripts/beer_plus_plus
 
 =cut

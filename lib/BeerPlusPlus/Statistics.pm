@@ -2,7 +2,7 @@ package BeerPlusPlus::Statistics;
 use Mojo::Base 'Mojolicious::Controller';
 
 #FIXME second time same variable, get rid of this and use config
-my $DATADIR = '../users';
+my $DATADIR = 'users';
 
 sub statistics
 {

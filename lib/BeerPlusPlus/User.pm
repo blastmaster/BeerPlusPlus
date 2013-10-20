@@ -5,7 +5,7 @@ use Data::Printer;
 use feature "say";
 
 #FIXME path should be absolute and in config
-my $DATADIR = '../users';
+my $DATADIR = 'users';
 
 #TODO: if tests run the relative path to user dir does not match need to replace
 # with a much smarter solution ... now!
