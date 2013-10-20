@@ -19,7 +19,6 @@ sub init
 		my $hash = $self->json2hash($user);
         p $hash;
 		while (my ($k, $v) = each %{$hash} ) {
-			say "k = $k\tv = $v";
 			$self->{$k} = $v;
 		}
 		return $hash;
@@ -98,7 +97,7 @@ sub increment
     my $timestamp = time;
     push @{$self->{times}}, $timestamp;
     $self->persist();
-    return $#{$self->{times}};
+    return @{$self->{times}};
 }
 
 sub persist
