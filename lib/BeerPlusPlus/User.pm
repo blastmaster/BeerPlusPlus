@@ -60,7 +60,7 @@ sub user_exists
 {
 	my ($self, $username) = @_;
 	return 0 unless $username;
-	my %users = map { $_ => 1 } ( $self->get_users );
+	my %users = map { $_ => 1 } ( $self->get_usernames );
 	return 1 if (exists $users{$username});
 	return 0;
 }
@@ -80,7 +80,33 @@ sub json2hash
 	return $hashref;
 }
 
+# WARNING: get_user, get_users and get_others returns unblessed list of hashes
+# at the time.
+
+sub get_user
+{
+    my ($self, $username) = @_;
+    my $userhash = $self->init($username);
+    return $userhash;
+}
+
 sub get_users
+{
+    my $self = shift;
+    my @userlist = $self->get_usernames();
+    my @user_obj_list = map { $self->init($_) } @userlist;
+    return wantarray ? @user_obj_list : \@user_obj_list;
+}
+
+sub get_others
+{
+    my $self = shift;
+    my @otherslist = $self->get_other_usernames();
+    my @others_obj_list = map { $self->init($_) } @otherslist;
+    return wantarray ? @others_obj_list : \@others_obj_list;
+}
+
+sub get_usernames
 {
 	my $self = shift;
 	#TODO path to user files should be read from config
@@ -91,33 +117,24 @@ sub get_users
 sub get_other_usernames
 {
     my $self = shift;
-    my @otherusers = grep {  !/$self->{user}/ } $self->get_users;
+    my @usernames = $self->get_usernames();
+    my @otherusers = grep {  !/$self->{user}/ } @usernames;
     return wantarray ? @otherusers : \@otherusers;
 }
 
-sub get_times_from_user
+sub get_timestamps
 {
-    my ($self, $username) = @_;
+    my $self = shift;;
     my @times = ();
-    if ($username) {
-        # get time from specific user
-    }
-    else {
-        @times = @{$self->{times}};
-    }
+    @times = @{$self->{times}};
     return wantarray ? @times : \@times;
 }
 
-sub get_counter_from_user
+sub get_counter
 {
-    my ($self, $username) = @_;
+    my $self = shift;
     my $counter = 0;
-    if ($username) {
-        # get specific user data
-    }
-    else {
-        $counter = $#{$self->{times}};
-    }
+    $counter = @{$self->{times}};
     return $counter;
 }
 
