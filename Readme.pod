@@ -6,17 +6,7 @@ BeerPlusPlus - Simple beer storage application
 
 =head1 INSTALLATION
 
-Using Dist::Zilla:
-
-Install dependencies:
-
-    dzil listdeps | cpanm
-
-Building, testing and installing:
-
-    dzil build
-    dzil test
-    dzil install
+makefile comming soon...
 
 =head1 USAGE
 
