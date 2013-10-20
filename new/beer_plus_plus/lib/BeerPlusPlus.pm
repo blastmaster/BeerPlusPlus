@@ -38,6 +38,8 @@ sub startup {
 
 	$r->get('/welcome' => sub { shift->render(template => 'welcome', format => 'html'); });
 
+	$r->get('/statistics')->to('statistics#statistics');
+
 	$r->post('/increment' => sub {
 		my $self = shift;
 		$self->session->{counter}++;
