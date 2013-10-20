@@ -1,6 +1,10 @@
 package BeerPlusPlus::User;
-# use Mojo::Base 'Mojolicious::Controller';
+
 use Mojo::JSON;
+use Digest::SHA qw(sha1_base64);
+use Cwd 'abs_path';
+use File::Basename;
+
 use Data::Printer;
 use feature "say";
 
@@ -17,13 +21,38 @@ sub init
 	my ($self, $user)  = @_;
 	if ( $self->user_exists($user) ) {
 		my $hash = $self->json2hash($user);
-        p $hash;
 		while (my ($k, $v) = each %{$hash} ) {
 			$self->{$k} = $v;
 		}
 		return $hash;
 	}
 	return undef;
+}
+
+sub create_users
+{
+    my $self = shift;
+	my @usernames = @_;
+	for my $username (@usernames) {
+		my $pass = sha1_base64('lukeichbindeinvater');
+		my %new_user = (
+			user => $username,
+			pass => $pass,
+			times => [],
+		);
+
+		my $json = Mojo::JSON->new;
+		my $data = $json->encode(\%new_user);
+
+		my $userfile = "$self->{datadir}/$username.json";
+		unless (-f $userfile) {
+			open my $fh, '>', $userfile or die qq/cannot open $userfile: $!/;
+			print {$fh} $data;
+			close $fh or warn "cannot close $userfile: $!";
+		} else {
+			say STDERR "warn: user '$username' already exists!";
+		}
+	}
 }
 
 sub user_exists

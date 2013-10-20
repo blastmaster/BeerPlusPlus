@@ -8,46 +8,10 @@ use feature 'say';
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/lib" }
 
-use Cwd 'abs_path';
-use Mojo::JSON;
-use Digest::SHA qw(sha1_base64);
-use File::Basename;
+# my $USERDIR = abs_path(dirname($0) . "/users");
+# $USERDIR =~ s/^\Q$ENV{PWD}\E/./; # relative path
+# mkdir $USERDIR and say "info: created directory $USERDIR" unless -d $USERDIR;
 
-my $USERDIR = abs_path(dirname($0) . "/users");
-$USERDIR =~ s/^\Q$ENV{PWD}\E/./; # relative path
-mkdir $USERDIR and say "info: created directory $USERDIR" unless -d $USERDIR;
-
-sub create_users
-{
-	my @usernames = @_;
-	for my $username (@usernames) {
-		my $pass = sha1_base64('lukeichbindeinvater');
-		my %new_user = (
-			pass => $pass,
-			user => $username,
-			counter => 0,
-		);
-
-		my $json = Mojo::JSON->new;
-		my $data = $json->encode(\%new_user);
-
-		my $userfile = "$USERDIR/$username.json";
-		unless (-f $userfile) {
-			open my $fh, '>', $userfile or die qq/cannot open $userfile: $!/;
-			print {$fh} $data;
-			close $fh or warn "cannot close $userfile: $!";
-		} else {
-			say STDERR "warn: user '$username' already exists!";
-		}
-	}
-}
-
-# TODO
-# better handling of commandline arguments
-# start webapplication just once
-if (@ARGV) {
-	create_users(@ARGV);
-}
 
 # Start command line interface for application
 require Mojolicious::Commands;
