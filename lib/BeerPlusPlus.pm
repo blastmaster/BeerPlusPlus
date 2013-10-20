@@ -48,12 +48,6 @@ sub startup {
 		$self->redirect_to('/welcome');
 	});
 
-	$r = $r->under(sub {
-			my $self = shift;
-			$self->render(controller => 'denied', subtitle => "rin'tel'noc");
-			return 0;
-	});
-
 	$r->get('/denied' => sub {
 		my $self = shift;
 		$self->render(controller => 'denied', subtitle => "rin'tel'noc");
