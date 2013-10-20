@@ -18,7 +18,13 @@ sub index
 	# FIXME http://onkeypress.blogspot.de/2011/07/perl-wide-character-in-subroutine-entry.html
 	my $pass = sha1_base64($self->param('pass')) || '';
 	my $userhash = $self->user->init($username);
-    my $counter = @{$userhash->{times}};
+    my $counter = 0;
+    if (@{$userhash->{times}}) {
+        $counter = @{$userhash->{times}};
+    }
+    else {
+        die "you may work with old userfile structure";
+    }
 	$self->res->headers->cache_control('max-age=1, no_cache');
 	$self->session(user => $username);
 	$self->session(pass => $pass);
