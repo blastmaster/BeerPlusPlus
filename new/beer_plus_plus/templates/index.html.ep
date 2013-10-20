@@ -1,17 +1,25 @@
+<!-- vim:ft=html -->
 % layout 'basic', subtitle => 'increment your blood alcohol level';
-%=form_for '/login' => (method => 'POST') => begin
-	<table>
-		<tr>
-			<td class="banner">beer</td>
-		</tr>
-		<tr>
-			<td><%=text_field 'user', id => 'user' %></td>
-			<td><%=password_field 'pass', id => 'pass' %></td>
-		</tr>
-		<tr>
-			<td/>
-			<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
-		</tr>
-	</table>
-%=end
+<div id="header" class="banner">beer</div>
+<div id="content" style="margin-top: 20px">
+	%=form_for '/login' => (method => 'POST') => begin
+		<table>
+			<colgroup>
+				<col width="50%"/>
+				<col width="50%"/>
+			</colgroup>
+			<!--tr>
+				<td class="banner">beer</td>
+			</tr-->
+			<tr>
+				<td><%=text_field 'user', id => 'user' %></td>
+				<td><%=password_field 'pass', id => 'pass' %></td>
+			</tr>
+			<tr>
+				<td/>
+				<td><%=submit_button '++', id => 'login', class => 'banner', title => 'login' %></td>
+			</tr>
+		</table>
+	%=end
+</div>
 
