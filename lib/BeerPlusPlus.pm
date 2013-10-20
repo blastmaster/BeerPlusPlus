@@ -41,10 +41,10 @@ sub startup {
 	$r->get('/statistics')->to('statistics#statistics');
 
 	$r->post('/increment' => sub {
-		my $self = shift;
-		$self->session->{counter}++;
-        my $counter = $self->session->{counter};
-		$self->user->persist($counter);
+        my $self = shift;
+        my $newcount = 0;
+        $newcount = $self->user->increment();
+        $self->session->{counter} = $newcount;
 		$self->redirect_to('/welcome');
 	});
 

@@ -55,25 +55,63 @@ sub get_users
 {
 	my $self = shift;
 	#TODO path to user files should be read from config
-	say "exists!!!" if -d $DATADIR;
-	say "datadir: $DATADIR";
 	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$DATADIR/*.json";
-	p @userlist;
 	return wantarray ? @userlist : \@userlist;
+}
+
+sub get_other_usernames
+{
+    my $self = shift;
+    my @otherusers = grep {  !/$self->{user}/ } $self->get_users;
+    return wantarray ? @otherusers : \@otherusers;
+}
+
+sub get_times_from_user
+{
+    my ($self, $username) = @_;
+    my @times = ();
+    if ($username) {
+        # get time from specific user
+    }
+    else {
+        @times = @{$self->{times}};
+    }
+    return wantarray ? @times : \@times;
+}
+
+sub get_counter_from_user
+{
+    my ($self, $username) = @_;
+    my $counter = 0;
+    if ($username) {
+        # get specific user data
+    }
+    else {
+        $counter = $#{$self->{times}};
+    }
+    return $counter;
+}
+
+sub increment
+{
+    my $self = shift;
+    my $timestamp = time;
+    push @{$self->{times}}, $timestamp;
+    $self->persist();
+    return $#{$self->{times}};
 }
 
 sub persist
 {
-	my ($self, $counter) = @_;
-	p $self;
+	my $self = shift;
 	my $user = $self->{user};
-	say "in persist counter: $counter";
 	my $pass = $self->{pass};
+    my @times = @{$self->{times}};
 	my $json = Mojo::JSON->new;
 	my $data = $json->encode({
 							user	=> $user,
-							counter => $counter,
-							pass	=> $pass
+							pass	=> $pass,
+							times   => \@times,
                         });
     p $data;
 	open my $fh, '>', "$DATADIR/$user.json" || die "cannot open $!";
