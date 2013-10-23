@@ -33,6 +33,15 @@ sub index
 	$self->redirect_to('/welcome');
 }
 
+sub plusplus
+{
+    my $self = shift;
+    my $newcount = 0;
+    $newcount = $self->user->increment();
+    $self->session->{counter} = $newcount;
+    $self->redirect_to('/welcome');
+}
+
 sub is_auth
 {
 	my $self = shift;

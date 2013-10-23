@@ -42,13 +42,7 @@ sub startup {
 
 	$r->get('/statistics')->to('statistics#statistics');
 
-	$r->post('/increment' => sub {
-        my $self = shift;
-        my $newcount = 0;
-        $newcount = $self->user->increment();
-        $self->session->{counter} = $newcount;
-		$self->redirect_to('/welcome');
-	});
+    $r->post('/increment')->to('login#plusplus');
 
 	$r->get('/denied' => sub {
 		my $self = shift;
