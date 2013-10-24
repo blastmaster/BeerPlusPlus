@@ -23,10 +23,6 @@ sub startup {
 	# Router
 	my $r = $self->routes;
 
-	$r->get( '/register' => sub {
-		my $self = shift;
-		$self->render('register');
-	});
 
 	$r->any('/')->to('login#login');
 
@@ -44,12 +40,15 @@ sub startup {
 
     $r->post('/increment')->to('login#plusplus');
 
+	$r->get('/chpw' => sub { shift->render('register'); });
+
+    $r->route('/register')->via('GET', 'POST')->to('login#register');
+
 	$r->get('/denied' => sub {
 		my $self = shift;
 		$self->render(controller => 'denied', subtitle => "rin'tel'noc");
 	});
 
-	$r->get('/chpw' => sub { shift->render('register'); });
 }
 
 sub footer {
@@ -68,7 +67,7 @@ HTML
 	my %pages = (
 		'/welcome' => 'home',
 		'/statistics' => 'statistics',
-#		'/chpw' => 'change password',
+		'/chpw' => 'change password',
 		'/rules.pdf' => 'rules'
 	);
 	my $current = $self->url_for('current');

@@ -80,6 +80,20 @@ sub json2hash
 	return $hashref;
 }
 
+# TODO: make password change more safe
+sub set_attribute
+{
+    my $self = shift;
+    my %attrs = @_;
+    my $changed = 0;
+    while (my ($k, $v) = each(%attrs)) {
+        $self->{$k} = $v;
+        warn "[DEBUG] setting user attribute $k = $v";
+        ++$changed;
+    }
+    return $changed;
+}
+
 # WARNING: get_user, get_users and get_others returns unblessed list of hashes
 # at the time.
 
@@ -163,26 +177,6 @@ sub persist
 	open my $fh, '>', "$self->{datadir}/$user.json" || die "cannot open $!";
 	print {$fh} $data;
 	close $fh;
-	return 0;
-}
-
-sub register
-{
-	my $self = shift;
-	return 0 if $self->param('passwd') ne $self->param('passwd2');
-	$self->check($self->param('passwd'), $self->param('passwd2'));
-	my $newph = sha1_base64($self->param('passwd'));
-	$self->session->{pass} = $newph;
-	$self->persist;
-	$self->init;
-	$self->redirect_to('/welcome');
-}
-
-sub check
-{
-	my $self = shift;
-	my $newpw = shift;
-	$self->render(text => qq/come on .../) if (length($newpw) < 8);
 	return 0;
 }
 

@@ -56,6 +56,36 @@ sub is_auth
 	return $self->redirect_to('/index');
 }
 
+sub register
+{
+	my $self = shift;
+    if ($self->req->method eq 'GET') {
+        $self->render('register');
+    }
+    elsif ($self->req->method eq 'POST') {
+        if ($self->param('passwd') ne $self->param('passwd2')) {
+            $self->render('register');
+            return 0;
+        }
+        $self->check($self->param('passwd'), $self->param('passwd2'));
+        my $newpw = sha1_base64($self->param('passwd'));
+        $self->session->{pass} = $newpw;
+        $self->session->{expected_pass} = $newpw;
+        $self->user->set_attribute(pass => $newpw);
+        $self->user->persist();
+        $self->redirect_to('/welcome');
+    }
+    return 1;
+}
+
+sub check
+{
+	my $self = shift;
+	my $newpw = shift;
+	$self->render(text => qq/come on .../) if (length($newpw) < 8);
+	return 0;
+}
+
 sub logout
 {
 	my $self = shift;
