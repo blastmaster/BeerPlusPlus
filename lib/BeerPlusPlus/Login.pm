@@ -1,5 +1,6 @@
 package BeerPlusPlus::Login;
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Log;
 
 use Digest::SHA qw(sha1_base64);
 use feature "say";
@@ -14,10 +15,16 @@ sub login
 sub index
 {
 	my $self = shift;
+    my $log = Mojo::Log->new;
 	my $username = $self->param('user') || '';
 	# FIXME http://onkeypress.blogspot.de/2011/07/perl-wide-character-in-subroutine-entry.html
 	my $pass = sha1_base64($self->param('pass')) || '';
 	my $userhash = $self->user->init($username);
+    unless ( $userhash ) {
+        $log->debug("userhash is undef ... redirect");
+        $self->redirect_to('/index');
+        return 0;
+    }
     my $counter = 0;
     if (@{$userhash->{times}}) {
         $counter = @{$userhash->{times}};
