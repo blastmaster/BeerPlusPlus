@@ -116,7 +116,9 @@ sub get_others
 {
     my $self = shift;
     my @otherslist = $self->get_other_usernames();
-    my @others_obj_list = map { $self->init($_) } @otherslist;
+    my @others_obj_list = map {
+			__PACKAGE__->new($self->{datadir})->init($_)
+	} @otherslist;
     return wantarray ? @others_obj_list : \@others_obj_list;
 }
 
