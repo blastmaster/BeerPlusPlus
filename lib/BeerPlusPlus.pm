@@ -41,6 +41,11 @@ sub startup {
 
 	$r = $r->under->to('login#is_auth');
 
+	# FIXME redirect to login if session is lost (e.g. after restart)
+#	$r = $r->under(sub {
+#			$self->redirect_to('/index') unless $self->{user};
+#	});
+
 	$r->get('/welcome' => sub { shift->render(template => 'welcome', format => 'html'); });
 
     $r->post('/increment')->to('login#plusplus');
