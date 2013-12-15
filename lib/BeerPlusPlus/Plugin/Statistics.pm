@@ -1,8 +1,20 @@
-package BeerPlusPlus::Statistics;
-use Mojo::Base 'Mojolicious::Controller';
+package BeerPlusPlus::Plugin::Statistics;
 
-sub statistics
-{
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+sub initialize($) {
+	my $self = shift;
+
+	$self->routes->get('/statistics' => \&statistics);
+
+	return '/statistics' => 'statistics';
+}
+
+sub statistics($) {
 	my $self = shift;
 
 	my %statistics;
@@ -18,4 +30,6 @@ sub statistics
     $self->render(template => 'statistics', stats => \%statistics);
 }
 
+
 1;
+

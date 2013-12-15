@@ -6,11 +6,18 @@ use BeerPlusPlus::User;
 use Data::Printer;
 use feature "say";
 
+
+use BeerPlusPlus::Plugin;
+
+
 my $DATADIR = 'users';
+my %reg_pages;
 
 # This method will run once at server start
 sub startup {
 	my $self = shift;
+
+	# TODO check for current structure and die if old one found
 
 	# Documentation browser under "/perldoc"
 	# $self->plugin('PODRenderer');
@@ -34,9 +41,12 @@ sub startup {
 
 	$r = $r->under->to('login#is_auth');
 
-	$r->get('/welcome' => sub { shift->render(template => 'welcome', format => 'html'); });
+	# FIXME redirect to login if session is lost (e.g. after restart)
+#	$r = $r->under(sub {
+#			$self->redirect_to('/index') unless $self->{user};
+#	});
 
-	$r->get('/statistics')->to('statistics#statistics');
+	$r->get('/welcome' => sub { shift->render(template => 'welcome', format => 'html'); });
 
     $r->post('/increment')->to('login#plusplus');
 
@@ -49,6 +59,7 @@ sub startup {
 		$self->render(controller => 'denied', subtitle => "rin'tel'noc");
 	});
 
+	%reg_pages = $self->initialize_plugins();
 }
 
 sub footer {
@@ -65,8 +76,8 @@ HTML
 	}
 
 	my %pages = (
+		%reg_pages,
 		'/welcome' => 'home',
-		'/statistics' => 'statistics',
 		'/chpw' => 'change password',
 		'/rules.pdf' => 'rules'
 	);
