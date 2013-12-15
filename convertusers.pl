@@ -19,6 +19,10 @@ sub backup
     }
 }
 
+# TODO:
+# Arguments are only username without json or path
+# must been started from the root directory
+# should been integrated in seperate User::Admin module
 my $user = BeerPlusPlus::User->new('users');
 my @users = ();
 if (@ARGV) {
