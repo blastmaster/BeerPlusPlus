@@ -108,7 +108,9 @@ sub get_users
 {
     my $self = shift;
     my @userlist = $self->get_usernames();
-    my @user_obj_list = map { $self->init($_) } @userlist;
+    my @user_obj_list = map {
+        __PACKAGE__->new($self->{datadir})->init($_)
+    } @userlist;
     return wantarray ? @user_obj_list : \@user_obj_list;
 }
 
