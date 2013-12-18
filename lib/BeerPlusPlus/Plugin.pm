@@ -13,16 +13,40 @@ namespace C<BeerPlusPlus::Plugin::>
 
 =head1 SYNOPSIS
 
+In the module which want to use the plugins:
+
   use BeerPlusPlus::Plugin;
 
   # ... and later
   $self->initialize_plugins(@params);
 
+A plugin module:
+
+  package BeerPlusPlus::Plugin::Example;
+
+  sub initialize { # or whatever the the init-subroutine is named (see OPTIONS)
+      my $self = shift;
+
+      # initialize the plugin, add routes etc., e.g.
+      $self->routes->get('/example' => sub { ... });
+
+      return '/example' => 'example-link'
+  }
+
 =head1 DESCRIPTION
 
 Using this module adds a subroutine C<initialize_plugins> into the namespace
 of the caller. To initialize the plugins this method has to be called from
-within the C<startup> method of the Mojolicious application.
+within the C<startup> method of the Mojolicious application. The return value
+of that subroutine is a hash which consists of path-linkname pairs.
+
+Any plugin must implement a subroutine whose name is specified by the OPTION
+C<sub> (defaults to C<initialize>). Within that subroutine the plugin should
+do its initialization and registration to the Mojolicious application. The
+return value should be a mapping C<$path => $linkname> which will later be
+translated into links to the plugin's page. If this is not a page-plugin an
+empty array should be returned. B<NOTE:> If the plugin does not implement such
+a subroutine it is silently skipped.
 
 =head2 EXPORT
 
