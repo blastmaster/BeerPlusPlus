@@ -171,7 +171,10 @@ sub store($$$) {
 	my $data_id = shift;
 	my $hash = shift;
 
-	unless (ref $hash eq 'HASH') {
+	unless (defined $hash) {
+		carp "undefined hash-reference";
+		return 0;
+	} elsif (ref $hash ne 'HASH') {
 		carp "not a hash-reference: $hash";
 		return 0;
 	}
