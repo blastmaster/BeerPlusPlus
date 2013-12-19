@@ -159,6 +159,11 @@ sub store($$$) {
 	my $data_id = shift;
 	my $hash = shift;
 
+	unless (ref $hash eq 'HASH') {
+		carp "not a hash-reference: $hash";
+		return 0;
+	}
+
 	my $path = $self->fullpath($data_id);
 	
 	unless (open FILE, '>', $path) {
