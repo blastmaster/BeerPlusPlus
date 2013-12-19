@@ -1,185 +1,156 @@
 package BeerPlusPlus::User;
 
-use Mojo::JSON;
-use Digest::SHA qw(sha1_base64);
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+use BeerPlusPlus::Database;
+
 use Cwd 'abs_path';
+use Digest::SHA qw(sha1_base64);
 use File::Basename;
+use Mojo::JSON;
+use Carp;
 
 use Data::Printer;
-use feature "say";
 
-# TODO: passing hash to constructor
-# datadir => $datadir
-# username => $username
-sub new
-{
-    my ($class, $datadir) = @_;
-    return bless {datadir => $datadir}, $class;
+
+my $DEFAULT_PASSWORD = 'lukeichbindeinvater';
+my $DB = BeerPlusPlus::Database->new('users');
+
+
+sub hash($) {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $password = shift;
+
+	return sha1_base64($password);
 }
 
-sub init
-{
-	my ($self, $user)  = @_;
-	if ( $self->user_exists($user) ) {
-		my $hash = $self->json2hash($user);
-		while (my ($k, $v) = each %{$hash} ) {
-			$self->{$k} = $v;
-		}
-		return $hash;
+sub create($$) {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $name = shift;
+	my $password = hash(shift || $DEFAULT_PASSWORD);
+
+	if ($DB->exists($name)) {
+		say STDERR "warn: user '$name' already exists!";
+		return 0;
 	}
-	return undef;
+
+	my $user = {
+		user => $name,
+		pass => $password,
+		times => [],
+		payoffset => 0,
+	};
+
+	return $DB->store($name, $user);
 }
 
-sub create_users
-{
-    my $self = shift;
-	my @usernames = @_;
-	for my $username (@usernames) {
-		my $pass = sha1_base64('lukeichbindeinvater');
-		my %new_user = (
-			user => $username,
-			pass => $pass,
-			times => [],
-		);
+sub list() {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
 
-		my $json = Mojo::JSON->new;
-		my $data = $json->encode(\%new_user);
-
-		my $userfile = "$self->{datadir}/$username.json";
-		unless (-f $userfile) {
-			open my $fh, '>', $userfile or die qq/cannot open $userfile: $!/;
-			print {$fh} $data;
-			close $fh or warn "cannot close $userfile: $!";
-		} else {
-			say STDERR "warn: user '$username' already exists!";
-		}
-	}
+	return $DB->list();
 }
 
-sub user_exists
-{
-	my ($self, $username) = @_;
-	return 0 unless $username;
-	my %users = map { $_ => 1 } ( $self->get_usernames );
-	return 1 if (exists $users{$username});
-	return 0;
+sub exists($) {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $name = shift;
+	
+	return $DB->exists($name);
 }
 
-sub json2hash
-{
+sub new($) {
+	my $class = shift;
+	my $user = shift or carp("undefined username");
+
+	return undef unless $DB->exists($user);
+
+	my $self = $DB->load($user);
+
+	return bless $self, $class;
+}
+
+sub get_name($) {
 	my $self = shift;
-	my $username = shift;
-	my $path = "$self->{datadir}/$username.json";
-	# TODO put more error handling instead of just dying
-	open my $fh, '<', $path or die qq/cannot open $path: $!/;
-	local $/ = undef;
-	my $data = <$fh>;
-	close $fh;
-	my $json = Mojo::JSON->new;
-	my $hashref = $json->decode($data);
-	return $hashref;
+
+	return $self->{user};
 }
 
-# TODO: make password change more safe
-sub set_attribute
-{
-    my $self = shift;
-    my %attrs = @_;
-    my $changed = 0;
-    while (my ($k, $v) = each(%attrs)) {
-        $self->{$k} = $v;
-        warn "[DEBUG] setting user attribute $k = $v";
-        ++$changed;
-    }
-    return $changed;
-}
-
-# WARNING: get_user, get_users and get_others returns unblessed list of hashes
-# at the time.
-
-sub get_user
-{
-    my ($self, $username) = @_;
-    my $userhash = $self->init($username);
-    return $userhash;
-}
-
-sub get_users
-{
-    my $self = shift;
-    my @userlist = $self->get_usernames();
-    my @user_obj_list = map { $self->init($_) } @userlist;
-    return wantarray ? @user_obj_list : \@user_obj_list;
-}
-
-sub get_others
-{
-    my $self = shift;
-    my @otherslist = $self->get_other_usernames();
-    my @others_obj_list = map {
-			__PACKAGE__->new($self->{datadir})->init($_)
-	} @otherslist;
-    return wantarray ? @others_obj_list : \@others_obj_list;
-}
-
-sub get_usernames
-{
+sub verify($$) {
 	my $self = shift;
-	#TODO path to user files should be read from config
-	my @userlist = grep { s/(.*\/|\.json$)//g } glob "$self->{datadir}/*.json";
-	return wantarray ? @userlist : \@userlist;
+	my $password = shift;
+
+	return $password eq $self->{pass};
 }
 
-sub get_other_usernames
-{
-    my $self = shift;
-    my @usernames = $self->get_usernames();
-    my @otherusers = grep {  !/$self->{user}/ } @usernames;
-    return wantarray ? @otherusers : \@otherusers;
-}
-
-sub get_timestamps
-{
-    my $self = shift;;
-    my @times = ();
-    @times = @{$self->{times}};
-    return wantarray ? @times : \@times;
-}
-
-sub get_counter
-{
-    my $self = shift;
-    my $counter = 0;
-    $counter = @{$self->{times}};
-    return $counter;
-}
-
-sub increment
-{
-    my $self = shift;
-    my $timestamp = time;
-    push @{$self->{times}}, $timestamp;
-    $self->persist();
-    return @{$self->{times}};
-}
-
-sub persist
-{
+sub get_count($) {
 	my $self = shift;
-	my $user = $self->{user};
-	my $pass = $self->{pass};
-    my @times = @{$self->{times}};
-	my $json = Mojo::JSON->new;
-	my $data = $json->encode({
-							user	=> $user,
-							pass	=> $pass,
-							times   => \@times,
-                        });
-    p $data;
-	open my $fh, '>', "$self->{datadir}/$user.json" || die "cannot open $!";
-	print {$fh} $data;
-	close $fh;
-	return 0;
+
+	return scalar $self->get_timestamps();
 }
+
+sub get_timestamps($) {
+	my $self = shift;
+
+	# NOTE this is just a check for older versions
+	return undef unless defined $self->{times};
+
+	return @{$self->{times}};
+}
+
+sub increment($) {
+    my $self = shift;
+
+	push $self->{times}, time;
+	$self->persist();
+
+	return $self->get_count();
+}
+
+sub change_password($$) {
+	my $self = shift;
+	my $newpw = shift;
+
+	# TODO may verify with old password before changing (?)
+
+	$self->{pass} = $newpw;
+
+	return $self->persist();
+}
+
+sub get_payoffset($) {
+	my $self = shift;
+
+	return $self->{payoffset};
+}
+
+sub set_payoffset($$) {
+	my $self = shift;
+	my $offset = shift;
+
+	$self->{payoffset} = $offset;
+}
+
+sub persist($) {
+	my $self = shift;
+
+	return $DB->store($self->{user}, $self);
+}
+
+sub list_others($) {
+	my $self = shift;
+	
+	return grep { not $_ eq $self->{user} } $self->list();
+}
+
+sub get_others($) {
+	my $self = shift;
+
+	return map { __PACKAGE__->new($_) } $self->list_others();
+}
+
 
 1;
+
