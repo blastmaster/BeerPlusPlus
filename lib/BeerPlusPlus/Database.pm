@@ -46,6 +46,7 @@ each possible hash-array-scalar combination can be stored.
 use Carp;
 use File::Path 'make_path';
 use Mojo::JSON 'j';
+use Scalar::Util qw(blessed reftype);
 
 
 =head2 VARIABLES
@@ -161,8 +162,9 @@ sub load($$) {
 
 =item $db->store($data_id, $data_hash)
 
-Stores the the given hash-reference associated to the data-ID. Returns true/1
-on success; false/0 otherwise.
+Stores the the given hash-reference associated to the data-ID. If the given
+reference is a blessed C<HASH> reference it will be converted to an unblessed
+one before storing. Returns true/1 on success; false/0 otherwise.
 
 =cut
 
@@ -175,8 +177,12 @@ sub store($$$) {
 		carp "undefined hash-reference";
 		return 0;
 	} elsif (ref $hash ne 'HASH') {
-		carp "not a hash-reference: $hash";
-		return 0;
+		if (blessed $hash and reftype $hash eq 'HASH') {
+			$hash = { %{$hash} };
+		} else {
+			carp "not a [blessed] hash-reference: $hash";
+			return 0;
+		}
 	}
 
 	my $path = $self->fullpath($data_id);

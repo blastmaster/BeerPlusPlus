@@ -36,7 +36,13 @@ silent
 	ok(! defined $db->load($ua_id), "loading unaccessable file results in 'undef'");
 
 	ok(! $db->store("undef hash-ref"), "abort if hash-reference is undef");
+
+	my $aobj = bless [ 'data', 'xyz' ], 'Test';
+	ok(! $db->store("bar", $aobj), "store blessed array-reference fails");
 };
+
+my $hobj = bless { data => 'xyz' }, 'Test';
+ok($db->store("bhr", $hobj), "store blessed hash-reference succeeds");
 
 
 $BeerPlusPlus::Database::DATADIR = tempdir('t/db.XXXXXXX', CLEANUP => 1);
