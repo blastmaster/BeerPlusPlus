@@ -1,8 +1,13 @@
-.*.swp
+# backup files
+.*.sw?
 .*.bak
-.*.swn
-.*.swo
+
+# releases
 .*.tar.gz
-.note
+
+# specific
 users
+db
+public/Gruppo*
+.note
 
