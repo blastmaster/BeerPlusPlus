@@ -121,6 +121,18 @@ sub fullpath($$) {
 	return $self->{base} . "/$data_id.json";
 }
 
+=item $db->list()
+
+Returns a list of all existent data-IDs.
+
+=cut
+
+sub list($) {
+	my $self = shift;
+
+	return grep { s/(.*\/|\.json$)//g } glob $self->{base} . '/*.json';
+}
+
 =item $db->load($data_id)
 
 Returns the hash-reference which is associated to the data-ID. The referenced
