@@ -34,6 +34,8 @@ silent
 	$db->store($ua_id, {});
 	chmod 0000, $db->fullpath($ua_id);
 	ok(! defined $db->load($ua_id), "loading unaccessable file results in 'undef'");
+
+	ok(! $db->store("undef hash-ref"), "abort if hash-reference is undef");
 };
 
 
