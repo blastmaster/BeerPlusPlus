@@ -100,6 +100,8 @@ Returns a list of IDs of all available stocks.
 =cut
 
 sub list {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+
 	return $DB->list();
 }
 
@@ -178,6 +180,26 @@ sub get_crates($) {
 
 	# why does sort return undef if crates are empty?
 	return sort { $a->{time} <=> $b->{time} } @{$self->{crates}};
+}
+
+=item $stock->calc_bottle_price($crate_price)
+
+Calculates the price per bottle with the following equation:
+
+  ($crate_price + $DEPOSIT_CRATE) / $BOTTLES_PER_CRATE + $DEPOSIT_BOTTLE
+
+=cut
+
+sub calc_bottle_price($) {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $crate_price = shift;
+
+	$crate_price = $crate_price->{price} if ref $crate_price eq 'HASH';
+
+	my $price = $crate_price + $DEPOSIT_CRATE;
+	my $bottle = $price / $BOTTLES_PER_CRATE + $DEPOSIT_BOTTLE;
+
+	return $bottle;
 }
 
 =back

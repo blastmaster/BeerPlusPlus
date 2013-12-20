@@ -30,4 +30,5 @@ my $oprice = 980;
 $stock->add_crate($otime, $oprice);
 is_deeply([ $stock->get_crates() ], [ { time => $otime, price => $oprice },
 		{ time => $time, price => $price } ], "crates are sorted by time");
+is($stock->calc_bottle_price($price), 59.5, "per bottle price");
 
