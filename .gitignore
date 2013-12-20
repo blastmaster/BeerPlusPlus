@@ -1,6 +1,6 @@
 # backup files
 .*.sw?
-.*.bak
+*.bak
 
 # releases
 .*.tar.gz
