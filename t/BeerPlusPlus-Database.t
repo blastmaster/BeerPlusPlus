@@ -3,15 +3,13 @@
 use strict;
 use warnings;
 
+
+use BeerPlusPlus::Test::Database;
+use BeerPlusPlus::Test::Util 'silent';
+
 use Test::More 'no_plan';
 BEGIN { use_ok('BeerPlusPlus::Database') }
 
-
-use File::Temp 'tempdir';
-sub silent(&);
-
-
-$BeerPlusPlus::Database::DATADIR = tempdir('t/db.XXXXXXX', CLEANUP => 1);
 
 my $db = BeerPlusPlus::Database->new('test');
 my ($id, $expected, $got) = 'entry';
@@ -45,17 +43,9 @@ my $hobj = bless { data => 'xyz' }, 'Test';
 ok($db->store("bhr", $hobj), "store blessed hash-reference succeeds");
 
 
-$BeerPlusPlus::Database::DATADIR = tempdir('t/db.XXXXXXX', CLEANUP => 1);
+BeerPlusPlus::Test::Database::reset_datadir();
+
 chmod 0000, "$BeerPlusPlus::Database::DATADIR";
 eval "BeerPlusPlus::Database->new('fail')";
 ok(! $?, "creating db w/o permissions fails fatally");
-
-
-
-sub silent(&) {
-	local *STDERR;
-	open STDERR, '>', '/dev/null' or die "cannot open /dev/null: $!";
-	shift->();
-	close STDERR or warn "cannot close /dev/null: $!";
-}
 
