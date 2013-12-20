@@ -6,11 +6,7 @@ use warnings;
 use feature 'say';
 
 
-BEGIN {
-	use BeerPlusPlus::Database;
-	use File::Temp 'tempdir';
-	$BeerPlusPlus::Database::DATADIR = tempdir('t/db.XXXXXXX', CLEANUP => 1);
-}
+use BeerPlusPlus::Test::Database;
 
 use Test::More 'no_plan';
 BEGIN { use_ok('BeerPlusPlus::User') }
