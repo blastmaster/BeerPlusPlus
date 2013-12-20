@@ -30,6 +30,8 @@ our $VERSION = '0.02';
 =head1 DESCRIPTION
 
 Sets the database module's variable C<DATADIR> to a temporary directory.
+The modules must be C<use>d before the module which uses the database
+module is loaded since the datadir is fix after including the module.
 This module is intended for test purposes only since the data get lost
 after the application terminated.
 
