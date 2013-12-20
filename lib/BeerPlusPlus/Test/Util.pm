@@ -36,7 +36,7 @@ imported individually or at once using the export tag C<:all>.
 
 =cut
 
-use base 'Exporter';
+use parent 'Exporter';
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
 	silent
