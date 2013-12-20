@@ -11,6 +11,11 @@ use feature 'say';
 BeerPlusPlus::Plugin - module which enables plugin support for modules of
 namespace C<BeerPlusPlus::Plugin::>
 
+=cut
+
+our $VERSION = '0.02';
+
+
 =head1 SYNOPSIS
 
   use BeerPlusPlus::Plugin;

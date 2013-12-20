@@ -11,6 +11,11 @@ use feature 'say';
 BeerPlusPlus::Test::Database - module for testing modules which use the
 database module internally
 
+=cut
+
+our $VERSION = '0.02';
+
+
 =head1 SYNOPSIS
 
   # initialize an empty test database

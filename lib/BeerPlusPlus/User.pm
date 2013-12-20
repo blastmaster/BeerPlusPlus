@@ -10,6 +10,11 @@ use feature 'say';
 
 BeerPlusPlus::User - module for managing beer++ users
 
+=cut
+
+our $VERSION = '0.11';
+
+
 =head1 SYNOPSIS
 
   use BeerPlusPlus::User;

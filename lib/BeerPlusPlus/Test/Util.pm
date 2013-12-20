@@ -10,6 +10,11 @@ use feature 'say';
 
 BeerPlusPlus::Test::Util - a module which provides test utilities
 
+=cut
+
+our $VERSION = '0.01';
+
+
 =head1 SYNOPSIS
 
   use BeerPlusPlus::Test::Util ':all';

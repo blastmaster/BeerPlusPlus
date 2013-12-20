@@ -10,6 +10,11 @@ use feature 'say';
 
 BeerPlusPlus::Database - interface to the persistance layer of beer++
 
+=cut
+
+our $VERSION = '0.03';
+
+
 =head1 SYNOPSIS
 
   use BeerPlusPlus::Database;
