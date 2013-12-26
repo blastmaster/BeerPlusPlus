@@ -15,20 +15,23 @@ BEGIN { use_ok('BeerPlusPlus::Stock', ':vars') }
 my $user = 'test';
 my $stock = BeerPlusPlus::Stock->new($user);
 is($stock->get_user(), $user, "equality of user names");
-is(scalar $stock->get_crates(), 0, "stock is empty after creation");
+is(scalar $stock->get_charges(), 0, "stock is empty after creation");
 
-my $time = time;
-my $price = 880;
-ok($stock->add_crate($time, $price), "adding a crate succeeds");
-my @crates = $stock->get_crates();
-is(scalar @crates, 1, "stock contains one crate after adding");
-is_deeply($crates[0], { time => $time, price => $price },
-		"check data structure of returned crate");
+my $time = 1286698210;
+my $amount = $BOTTLES_PER_CRATE;
+my $price = 880 / $amount;
+ok($stock->fill($time, $price, $amount), "adding a crate successfully");
+my @charges = $stock->get_charges();
+is(scalar @charges, 1, "stock contains one crate after adding");
+
+my $charge = $charges[0];
+is($charge->time(), $time, "check (re)stored data structure (time)");
+is($charge->price(), $price, "check (re)stored data structure (price)");
+is($charge->amount(), $amount, "check (re)stored data structure (amount)");
 
 my $otime = $time - 245;
-my $oprice = 980;
-$stock->add_crate($otime, $oprice);
-is_deeply([ $stock->get_crates() ], [ { time => $otime, price => $oprice },
-		{ time => $time, price => $price } ], "crates are sorted by time");
-is($stock->calc_bottle_price($price), 59.5, "per bottle price");
+my $oprice = 980 / $amount;
+$stock->fill($otime, $oprice, $amount);
+is_deeply([ map { $_->time } $stock->get_charges() ], [ $otime, $time ],
+		"crates are sorted by time");
 

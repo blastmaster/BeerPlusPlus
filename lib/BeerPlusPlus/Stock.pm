@@ -8,11 +8,11 @@ use feature 'say';
 
 =head1 NAME
 
-BeerPlusPlus::Stock - module to manage beer++ stocks
+BeerPlusPlus::Stock - module to manage beer++ stocks and their charges
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.10';
 
 
 =head1 SYNOPSIS
@@ -21,11 +21,13 @@ our $VERSION = '0.01';
 
   $stock = BeerPlusPlus::Stock->new($user);
 
-  $stock->add_crate(time, $price_in_cents);
-  ($crate) = $stock->get_crates();
+  $username = $stock->get_user();
+  $stock->fill($time, $price, $amount);
+  ($charge) = $stock->get_charges();
 
-  $time = $crate->{time};
-  $price = $crate->{price};
+  $time = $charge->time();
+  $price = $charge->price();
+  $amount = $charge->amount();
 
 =head1 DESCIRPTION
 
@@ -125,7 +127,7 @@ sub new($$) {
 	unless (keys %{$self}) {
 		# TODO rename to owner (?)
 		$self->{user} = $user;
-		$self->{crates} = [];
+		$self->{charges} = [];
 	}
 
 	return bless $self, $class;
@@ -143,63 +145,119 @@ sub get_user($) {
 	return $self->{user};
 }
 
-=item $stock->add_crate($time => $price)
+=item $stock->fill($time, $price[, $amount])
 
-Adds a crate to the stock. The crate is descibed by the time (as Perl's
-builtin C<time> returns) and price (in cents) it was bought. Returns
-true/1 if the addition was successful, false/0 otherwise.
+Adds a charge to the stock. The charge is descibed by the time (as Perl's
+builtin C<time> returns) and price (in cents, per bottle) it was bought.
+Optionally the amount (which defaults to 20) can be specified. Returns
+true/1 if the addition was successful, false/0 otherwise. The charges are
+stored in temporal order.
 
 =cut
 
-sub add_crate($$$) {
+sub fill($$$;$) {
 	my $self = shift;
 	my $time = shift;
 	my $price = shift;
+	my $amount = shift || $BOTTLES_PER_CRATE;
 
-	push $self->{crates}, { time => $time, price => $price };
+	@{$self->{charges}} = sort { $a->{time} <=> $b->{time} }
+			@{$self->{charges}}, {
+				time => $time,
+				price => $price,
+				amount => $amount,
+			};
 
 	return $DB->store($self->get_user, $self);
 }
 
-=item $stock->get_crates()
 
-Returns a time sorted list of crates which are actually hash-references
-with the following structure:
+=item $stock->get_charges()
 
-  $crate = {
-      time => ...,
-      price => ....
-  }
+Returns a time sorted list of charges which are actually objects of the
+C<BeerPlusPlus::Stock::Charge> package (see section CHARGE below).
 
 =cut
 
-sub get_crates($) {
+sub get_charges($) {
 	my $self = shift;
 
-	return 0 unless @{$self->{crates}};
-
-	# why does sort return undef if crates are empty?
-	return sort { $a->{time} <=> $b->{time} } @{$self->{crates}};
+	return map { BeerPlusPlus::Stock::Charge->new($_) } @{$self->{charges}};
 }
 
-=item $stock->calc_bottle_price($crate_price)
-
-Calculates the price per bottle with the following equation:
-
-  ($crate_price + $DEPOSIT_CRATE) / $BOTTLES_PER_CRATE + $DEPOSIT_BOTTLE
+=back
 
 =cut
 
-sub calc_bottle_price($) {
-	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
-	my $crate_price = shift;
 
-	$crate_price = $crate_price->{price} if ref $crate_price eq 'HASH';
+=head1 CHARGE
 
-	my $price = $crate_price + $DEPOSIT_CRATE;
-	my $bottle = $price / $BOTTLES_PER_CRATE + $DEPOSIT_BOTTLE;
+The C<BeerPlusPlus::Stock::Charge> package encapsulates a filled in charge
+and thus is specified by time, price and amount. It also provides some
+convenience routines.
 
-	return $bottle;
+=cut
+
+package BeerPlusPlus::Stock::Charge;
+
+=head2 METHODS
+
+=over 4
+
+=item BeerPlusPlus::Stock::Charge->new({ time => $t, price => $p, amount => $a})
+
+Creates a new charge-object with the specified data. This constructor is
+intended for internal use only.
+
+=cut
+
+sub new($$) {
+	my $class = shift;
+	my $data = shift;
+
+	my $self = {
+		time => $data->{time},
+		price => $data->{price},
+		amount => $data->{amount},
+	};
+
+	return bless $self, $class;
+}
+
+=item $charge->time()
+
+Returns the time the charge was added to the stock.
+
+=cut
+
+sub time($) {
+	my $self = shift;
+
+	return $self->{time};
+}
+
+=item $charge->price()
+
+Returns the price per bottle of the charge.
+
+=cut
+
+sub price($) {
+	my $self = shift;
+
+	return $self->{price};
+}
+
+=item $charge->amount()
+
+Returns the amount of bottles of the charge.
+
+=cut
+
+sub amount($) {
+	my $self = shift;
+
+	return $self->{amount};
 }
 
 =back
