@@ -35,3 +35,10 @@ $stock->fill($otime, $oprice, $amount);
 is_deeply([ map { $_->time } $stock->get_charges() ], [ $otime, $time ],
 		"crates are sorted by time");
 
+is($charge->date("%d-%02d-%02d %02d:%02d:%02d", reverse 0 .. 5),
+		"2010-10-10 10:10:10", "date formatting works");
+
+is_deeply([ map { $_->bottles } $stock->get_charges ],
+		[ ($oprice) x $BOTTLES_PER_CRATE,  ($price) x $BOTTLES_PER_CRATE ],
+		"must be 40 bottles sorted by time");
+

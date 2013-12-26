@@ -260,6 +260,66 @@ sub amount($) {
 	return $self->{amount};
 }
 
+=item $charge->date([$format, @fields])
+
+Returns the time of the charge as formatted date/time. The first argument is
+the format while the following list defines the fields and order of Perl's
+builtin C<localtime> (only the fields from C<0> to C<5> can be used). By
+default the format is C<%02d.%02d.%d> using the list C<3 .. 5> which results
+in C<DD.MM.YYYY>. To produce a string equals to C<YYYY-MM-DD HH:mm:ss> just
+specify
+
+  $charge->date("%d-%02d-%02d %02d:%02d:%02d", reverse 0 .. 5)
+
+See L<perldoc/localtime> and L<perldoc/sprintf> for more information.
+
+=cut
+
+sub date($;$@) {
+	my $self = shift;
+	my $format = shift || "%02d.%02d.%d";
+	my @fields = @_  ? @_ : 3 .. 5;
+
+	my ($sec, $min, $hour, $day, $mon, $year) = localtime $self->time;
+	$year += 1900;
+	$mon += 1;
+
+	return sprintf $format, ($sec, $min, $hour, $day, $mon, $year)[@fields];
+}
+
+=item $charge->bottles()
+
+Returns a list of bottles of the charge which is actually the price per bottle
+times the charge's amount. This method is provided for convenience.
+
+=cut
+
+sub bottles($) {
+	my $self = shift;
+
+	return ($self->price) x $BOTTLES_PER_CRATE;
+}
+
+=item $charge->to_string()
+
+Returns a string representation of the charge consisted of the date/time, the
+amount (crates/bottles) and some calculated prices (total and bottle price).
+
+=cut
+
+sub to_string($) {
+	my $self = shift;
+
+	my $price = $self->price;
+	my $total = $price * $self->amount;
+
+	return sprintf "[%s] %d crates + %d bottles = %d.%02d€ (%d.%02d€/bottle)",
+			$self->date,
+			$self->amount / $BOTTLES_PER_CRATE,
+			$self->amount % $BOTTLES_PER_CRATE,
+			$total / 100, $total % 100, $price / 100, $price % 100;
+}
+
 =back
 
 =cut
