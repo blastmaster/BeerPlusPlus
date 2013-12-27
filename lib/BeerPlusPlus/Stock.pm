@@ -220,7 +220,9 @@ C<BeerPlusPlus::Stock::Charge> package (see section CHARGE below).
 sub get_charges($) {
 	my $self = shift;
 
-	return map { BeerPlusPlus::Stock::Charge->new($_) } @{$self->{charges}};
+	my @charges = @{$self->{charges}};
+
+	return map { BeerPlusPlus::Stock::Charge->new($_, $self) } @charges;
 }
 
 =item $stock->persist()
@@ -354,11 +356,13 @@ intended for internal use only.
 sub new($$) {
 	my $class = shift;
 	my $data = shift;
+	my $stock = shift;
 
 	my $self = {
 		time => $data->{time},
 		price => $data->{price},
 		amount => $data->{amount},
+		stock => $stock,
 	};
 
 	return bless $self, $class;
@@ -398,6 +402,18 @@ sub amount($) {
 	my $self = shift;
 
 	return $self->{amount};
+}
+
+=item $charge->stock()
+
+Returns the stock the charge belongs to.
+
+=cut
+
+sub stock($) {
+	my $self = shift;
+
+	return $self->{stock};
 }
 
 =item $charge->date([$format, @fields])

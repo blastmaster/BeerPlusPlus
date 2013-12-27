@@ -29,6 +29,7 @@ my $charge = $charges[0];
 is($charge->time(), $time, "check (re)stored data structure (time)");
 is($charge->price(), $price, "check (re)stored data structure (price)");
 is($charge->amount(), $amount, "check (re)stored data structure (amount)");
+is($charge->stock(), $stock, "stock-object is injected into charge");
 
 my $otime = $time - 245;
 my $oprice = 980 / $amount;
