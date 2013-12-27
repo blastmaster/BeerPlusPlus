@@ -26,6 +26,9 @@ our $VERSION = '0.11';
   for my $name (@usernames) {
       my $user = BeerPlusPlus::User->new($name);
 
+      $user->get_name() eq $name or die "...";
+      my $email = $user->get_email();
+
       $user->increment();
 
       my $count = $user->get_count();
@@ -106,6 +109,7 @@ sub create($$) {
 	my $user = {
 		user => $name,
 		pass => $password,
+		email => undef,
 		times => [],
 		payoffset => 0,
 	};
@@ -245,6 +249,34 @@ sub change_password($$) {
 	# TODO may verify with old password before changing (?)
 
 	$self->{pass} = $newpw;
+
+	return $self->persist();
+}
+
+=item $user->get_email()
+
+Returns the email address of the user.
+
+=cut
+
+sub get_email($) {
+	my $self = shift;
+
+	return $self->{email};
+}
+
+=item $user->set_email($email)
+
+Updates the email address with the given one. Returns true/1 on success;
+otherwise false/0.
+
+=cut
+
+sub set_email($$) {
+	my $self = shift;
+	my $email = shift;
+
+	$self->{email} = $email;
 
 	return $self->persist();
 }
