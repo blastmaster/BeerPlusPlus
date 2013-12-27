@@ -15,6 +15,7 @@ BEGIN { use_ok('BeerPlusPlus::Stock', ':vars') }
 my $user = 'test';
 my $stock = BeerPlusPlus::Stock->new($user);
 is($stock->get_user(), $user, "equality of user names");
+is($stock->get_account(), undef, "user's account is undefined if unset");
 is(scalar $stock->get_charges(), 0, "stock is empty after creation");
 
 my $time = 1286698210;
@@ -41,4 +42,14 @@ is($charge->date("%d-%02d-%02d %02d:%02d:%02d", reverse 0 .. 5),
 is_deeply([ map { $_->bottles } $stock->get_charges ],
 		[ ($oprice) x $BOTTLES_PER_CRATE,  ($price) x $BOTTLES_PER_CRATE ],
 		"must be 40 bottles sorted by time");
+
+my $a_holder = 'Netzbiotop Dresden e.V.';
+my $a_number = 4655221005;
+my $a_code = 85090000;
+ok($stock->set_account($a_holder, $a_number, $a_code),
+		"updating the user's account data succeeds");
+my $account = $stock->get_account();
+is($account->holder(), $a_holder, "stored account holder matches");
+is($account->number(), $a_number, "stored account number matches");
+is($account->code(), $a_code, "stored account code matches");
 

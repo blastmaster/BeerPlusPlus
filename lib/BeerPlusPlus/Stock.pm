@@ -22,6 +22,8 @@ our $VERSION = '0.10';
   $stock = BeerPlusPlus::Stock->new($user);
 
   $username = $stock->get_user();
+  $account = $stock->get_account();
+
   $stock->fill($time, $price, $amount);
   ($charge) = $stock->get_charges();
 
@@ -127,6 +129,7 @@ sub new($$) {
 	unless (keys %{$self}) {
 		# TODO rename to owner (?)
 		$self->{user} = $user;
+		$self->{account} = undef;
 		$self->{charges} = [];
 	}
 
@@ -143,6 +146,41 @@ sub get_user($) {
 	my $self = shift;
 
 	return $self->{user};
+}
+
+=item $stock->get_account()
+
+Returns the user's account. See section ACCOUNT for more information on
+how to work with the delivered data.
+
+=cut
+
+sub get_account($) {
+	my $self = shift;
+
+	return BeerPlusPlus::Stock::Account->new($self->{account});
+}
+
+=item $stock->set_account($holder, $number, $code);
+
+Updates the user's account data. Returns true/1 on success; otherwise
+false/0.
+
+=cut
+
+sub set_account($$$$) {
+	my $self = shift;
+	my $holder = shift;
+	my $number = shift;
+	my $code = shift;
+
+	$self->{account} = {
+		holder => $holder,
+		number => $number,
+		code => $code,
+	};
+
+	return $self->persist();
 }
 
 =item $stock->fill($time, $price[, $amount])
@@ -168,7 +206,7 @@ sub fill($$$;$) {
 				amount => $amount,
 			};
 
-	return $DB->store($self->get_user, $self);
+	return $self->persist();
 }
 
 
@@ -183,6 +221,108 @@ sub get_charges($) {
 	my $self = shift;
 
 	return map { BeerPlusPlus::Stock::Charge->new($_) } @{$self->{charges}};
+}
+
+=item $stock->persist()
+
+Persists the current state of the stock-object. Returns true/1 if the object
+was stored successfully; otherwise false/0.
+
+=cut
+
+sub persist($) {
+	my $self = shift;
+
+	return $DB->store($self->get_user, $self);
+}
+
+=back
+
+=cut
+
+
+=head1 ACCOUNT
+
+The C<BeerPlusPlus::Stock::Account> package provides convenient access to
+the user's account data. The account is used for the billing.
+
+=cut
+
+package BeerPlusPlus::Stock::Account;
+
+=head2 METHODS
+
+=over 4
+
+=item BeerPlusPlus::Stock::Account->new({ holder => $h, number => $n, code => $c })
+
+Creates a new account-object with the given data. If no data is given C<undef>
+is returned. This constructor is intended for internal use only.
+
+=cut
+
+sub new($$) {
+	my $class = shift;
+	my $data = shift;
+
+	return undef unless $data;
+
+	my $self = {
+		holder => $data->{holder},
+		number => $data->{number},
+		code => $data->{code},
+	};
+
+	return bless $self, $class;
+}
+
+=item $account->holder();
+
+Returns the name of the account's holder or owner, respectively.
+
+=cut
+
+sub holder($) {
+	my $self = shift;
+
+	return $self->{holder};
+}
+
+=item $account->number();
+
+Returns the account number.
+
+=cut
+
+sub number($) {
+	my $self = shift;
+
+	return $self->{number};
+}
+
+=item $account->code();
+
+Returns the code of the bank the account belongs to.
+
+=cut
+
+sub code($) {
+	my $self = shift;
+
+	return $self->{code};
+}
+
+=item $account->to_string();
+
+Generates an appropriate text representation of the account.
+
+=cut
+
+sub to_string() {
+	my $self = shift;
+
+	return sprintf "Account\n-------\nHolder: %s\nNumber: %s\nCode:   %s",
+			$self->holder(), $self->number(), $self->code();
 }
 
 =back
