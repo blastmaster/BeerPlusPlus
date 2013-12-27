@@ -210,6 +210,36 @@ sub store($$$) {
 1;
 __END__
 
+=head1 IDEAS / TODOs / FUTURE PLANS
+
+=over 4
+
+=item * enable support for extending classes
+
+  use BeerPlusPlus::Database 'store_id';
+
+  $DB->...
+
+OR
+
+  use parent 'BeerPlusPlus::Database';
+
+  our $STORE_ID = '...';
+
+  sub read {
+      my $self = shift;
+      # modify internal data...
+      $self->load($data_id);
+  }
+
+  sub write {
+      my $self = shift;
+      # modify internal data...
+      $self->store($data_id);
+  }
+
+=back
+
 =head1 AUTHOR
 
 8ware, E<lt>8wared@googlemail.comE<gt>
