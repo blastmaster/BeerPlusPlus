@@ -40,7 +40,7 @@ is($charge->date("%d-%02d-%02d %02d:%02d:%02d", reverse 0 .. 5),
 		"2010-10-10 10:10:10", "date formatting works");
 
 is_deeply([ map { $_->bottles } $stock->get_charges ],
-		[ (64.5) x $BOTTLES_PER_CRATE,  (59.5) x $BOTTLES_PER_CRATE ],
+		[ (57) x $amount,  (52) x $BOTTLES_PER_CRATE ],
 		"must be 40 bottles sorted by time");
 
 my $a_holder = 'Netzbiotop Dresden e.V.';
