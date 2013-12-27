@@ -429,15 +429,22 @@ sub date($;$@) {
 
 =item $charge->bottles()
 
-Returns a list of bottles of the charge which is actually the price per bottle
-times the charge's amount. This method is provided for convenience.
+Returns a list of bottles of the charge which is in fact the price per bottle
+times the charge's amount. The price is calculated as follows:
+
+  $price + $DEPOSIT_BOTTLE + $DEPOSIT_CRATE / $BOTTLES_PER_CRATE
+
+Thus by changing the values of both deposit variables can change the result.
+To ignore the deposits for calculation simply set the variables to zero. This
+method is provided for convenience.
 
 =cut
 
 sub bottles($) {
 	my $self = shift;
 
-	return ($self->price) x $BOTTLES_PER_CRATE;
+	return ($self->price + $DEPOSIT_BOTTLE
+			+ $DEPOSIT_CRATE / $BOTTLES_PER_CRATE) x $BOTTLES_PER_CRATE;
 }
 
 =item $charge->to_string()
