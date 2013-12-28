@@ -10,8 +10,8 @@
 				<col width="25%"/>
 			</colgroup>
 			<tr>
-				<td><%= session 'user' %>'s count:</td>
-				<td align="right"><%= session 'counter' %></td>
+				<td><%= $user %>'s count:</td>
+				<td align="right"><%= $count %></td>
 			</tr>
 			<tr>
 				<td/>
