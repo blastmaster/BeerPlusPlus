@@ -222,14 +222,16 @@ sub get_timestamps($) {
 =item $user->increment()
 
 Increments the user's count by one by adding the current timestamp. The
-updated count is returned.
+updated count is returned. Optionally the time can be specified as second
+argument.
 
 =cut
 
-sub increment($) {
+sub increment($;$) {
     my $self = shift;
+	my $time = shift || time;
 
-	push $self->{times}, time;
+	push $self->{times}, $time;
 	$self->persist();
 
 	return $self->get_count();
