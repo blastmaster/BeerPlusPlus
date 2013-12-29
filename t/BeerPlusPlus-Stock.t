@@ -13,15 +13,18 @@ BEGIN { use_ok('BeerPlusPlus::Stock', ':vars') }
 
 
 my $user = 'test';
+ok(! BeerPlusPlus::Stock->exists($user), "user is not created, yet");
 my $stock = BeerPlusPlus::Stock->new($user);
 is($stock->get_user(), $user, "equality of user names");
 is($stock->get_account(), undef, "user's account is undefined if unset");
 is(scalar $stock->get_charges(), 0, "stock is empty after creation");
+ok(! BeerPlusPlus::Stock->exists($user), "user is still not created, yet");
 
 my $time = 1286698210;
 my $amount = $BOTTLES_PER_CRATE;
 my $price = 880 / $amount;
 ok($stock->fill($time, $price, $amount), "adding a crate successfully");
+ok(BeerPlusPlus::Stock->exists($user), "user is created after modification");
 my @charges = $stock->get_charges();
 is(scalar @charges, 1, "stock contains one crate after adding");
 

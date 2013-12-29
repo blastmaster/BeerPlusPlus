@@ -109,6 +109,19 @@ sub list {
 	return $DB->list();
 }
 
+=item BeerPlusPlus->exists()
+
+Returns true/1 if the user exists already; otherwise false/0.
+
+=cut
+
+sub exists {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $user = shift;
+
+	return $DB->exists($user);
+}
+
 =back
 
 =head2 OBJECT METHODS
