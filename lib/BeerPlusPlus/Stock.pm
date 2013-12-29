@@ -19,6 +19,7 @@ our $VERSION = '0.10';
 
   use BeerPlusPlus::Stock;
 
+  BeerPlusPlus::Stock->exists($user) or die;
   $stock = BeerPlusPlus::Stock->new($user);
 
   $username = $stock->get_user();
@@ -109,7 +110,7 @@ sub list {
 	return $DB->list();
 }
 
-=item BeerPlusPlus->exists()
+=item BeerPlusPlus->exists($user)
 
 Returns true/1 if the user exists already; otherwise false/0.
 
