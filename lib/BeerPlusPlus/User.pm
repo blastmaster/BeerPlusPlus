@@ -29,7 +29,7 @@ our $VERSION = '0.11';
       $user->get_name() eq $name or die "...";
       my $email = $user->get_email();
 
-      $user->increment();
+      $user->consume();
 
       my $count = $user->get_count();
       my @timestamps = $user->get_timestamps();
@@ -40,7 +40,7 @@ our $VERSION = '0.11';
 The user module is intended to serve both as management unit and as data
 structure. The usual life cycle is as follows: First the new is added to
 the system using the class' C<create> method. Then over time the score is
-C<increment>ed as the user consumes beer. Since the main purpose of the
+incremented as the user C<consume>s beer. Since the main purpose of the
 whole application is a automatic billing system the consumed beer are
 accounted periodically. To avoid the loss of statistically interesting
 data the count is not resetted. Instead a pay offset is introduced which
@@ -219,7 +219,7 @@ sub get_timestamps($) {
 	return @{$self->{times}};
 }
 
-=item $user->increment()
+=item $user->consume()
 
 Increments the user's count by one by adding the current timestamp. The
 updated count is returned. Optionally the time can be specified as second
@@ -227,7 +227,7 @@ argument.
 
 =cut
 
-sub increment($;$) {
+sub consume($;$) {
     my $self = shift;
 	my $time = shift || time;
 

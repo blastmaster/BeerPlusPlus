@@ -43,7 +43,7 @@ sub plusplus
 {
     my $self = shift;
 
-	$self->user->increment();
+	$self->user->consume();
     $self->redirect_to('/welcome');
 }
 
