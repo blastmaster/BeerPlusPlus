@@ -28,8 +28,8 @@ is($user->get_email(), $mail, "email was persisted and restored successfully");
 ok($user->verify($user->hash($pass)), "test password varification");
 
 is($user->get_count(), 0, "new user's count is 0");
-is($user->increment(), $user->get_count(), "increment returns updated count");
-is($user->get_count(), 1, "user's count is 1 after incrementation");
+is($user->consume(), $user->get_count(), "consume returns updated count");
+is($user->get_count(), 1, "user's count is 1 after consumption");
 
 my $new_pass = 'new-test-pass';
 ok($user->change_password($new_pass), "change password successfully");

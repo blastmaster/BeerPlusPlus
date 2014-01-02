@@ -19,6 +19,7 @@ our $VERSION = '0.10';
 
   use BeerPlusPlus::Stock;
 
+  BeerPlusPlus::Stock->exists($user) or die;
   $stock = BeerPlusPlus::Stock->new($user);
 
   $username = $stock->get_user();
@@ -107,6 +108,19 @@ sub list {
 	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
 
 	return $DB->list();
+}
+
+=item BeerPlusPlus->exists($user)
+
+Returns true/1 if the user exists already; otherwise false/0.
+
+=cut
+
+sub exists {
+	shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+	my $user = shift;
+
+	return $DB->exists($user);
 }
 
 =back
