@@ -11,6 +11,11 @@ use feature 'say';
 BeerPlusPlus::Plugin - module which enables plugin support for modules of
 namespace C<BeerPlusPlus::Plugin::>
 
+=cut
+
+our $VERSION = '0.02';
+
+
 =head1 SYNOPSIS
 
 In the module which want to use the plugins:
@@ -113,7 +118,7 @@ __END__
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 by 8ware
+Copyright (C) 2013 by Innercircle
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.14.2 or,

@@ -11,6 +11,8 @@ sub initialize($) {
 
 	$self->routes->get('/statistics' => \&statistics);
 
+#	$self->linkman->add('/statistics' => 'statistics');
+
 	return '/statistics' => 'statistics';
 }
 
@@ -18,15 +20,15 @@ sub statistics($) {
 	my $self = shift;
 
 	my %statistics;
-    my @otherusers = $self->user->get_others();
-
-    for my $userhash (@otherusers) {
-        # hash accesses will be replaced by suitable method call's
-        my $name = $userhash->{user};
-        my $count = @{$userhash->{times}};
+    for my $user ($self->user->get_others()) {
+        my $name = $user->get_name();
+        my $count = $user->get_count();
         $statistics{$name} = $count if $count;
     }
 
+	my $user = $self->user;
+	$self->stash(user => $user->get_name());
+	$self->stash(count => $user->get_count());
     $self->render(template => 'statistics', stats => \%statistics);
 }
 
