@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-BeerPlusPlus - Simple beer storage application
+BeerPlusPlus - Simple beer storage and billing application
 
 =head1 INSTALLATION
 
