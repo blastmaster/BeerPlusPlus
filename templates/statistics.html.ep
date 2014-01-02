@@ -9,8 +9,8 @@
 				<col width="25%"/>
 			</colgroup>
 			<tr>
-				<td><%= session 'user' %></td>
-				<td align="right"><%= session 'counter' %></td>
+				<td><%= $user %></td>
+				<td align="right"><%= $count %></td>
 			</tr>
 		</table>
 		<hr/>
@@ -50,7 +50,7 @@
 			<% for my $user (keys %{$stats}) { %>
 				<% $sum += $stats->{$user}; %>
 			<% } %>
-			<% $sum += session 'counter'; %>
+			<% $sum += $count; %>
 			<tr>
 				<td></td>
 				<td align="right"><%= $sum %></td>

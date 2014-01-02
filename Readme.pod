@@ -6,26 +6,20 @@ BeerPlusPlus - Simple beer storage application
 
 =head1 INSTALLATION
 
-Using Dist::Zilla:
-
-Install dependencies:
-
-    dzil listdeps | cpanm
-
-Building, testing and installing:
-
-    dzil build
-    dzil test
-    dzil install
+makefile comming soon...
 
 =head1 USAGE
 
 Run application on Mojolicious test server available at localhost:3000
 
-    morbo BeerPlusPlus.pm
+    ./beer++
 
-Create a new user
+To run the application for development purposes start morbo as follows:
 
-    ./create_user.pl <username>
+    morbo -w templates/ -w public/ -w lib/ beer++
+
+In this case morbo listens to changes on each specified directory plus the
+application script.
 
 =cut
+

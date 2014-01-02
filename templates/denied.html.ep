@@ -1,0 +1,8 @@
+<!-- vim:ft=html -->
+% layout 'basic';
+<div id="header" class="banner" style="font-size: 3.7em">Rin'tel'noc!</div>
+<div id="content">
+	Permission denied!
+</div>
+%= footer 'only_login'
+
