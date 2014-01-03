@@ -53,18 +53,6 @@ use Carp;
 # setting template dir to something useful by default !!!
 our $TEMPLATE_DIR = "";
 
-
-# if ("BeerPlusPlus::User" and BeerPlusPlus::User->exists($user_name)) {
-#     my $u = BeerPlusPlus::User->new($user_name);
-#     @timestamps = $u->get_timestamps();
-# }
-# elsif (ref $user_name eq "BeerPlusPlus::User") {
-#     @timestamps = $user_name->get_timestamps();
-# }
-# else {
-#     croak "what the hell do you giving me ?";
-# }
-
 =head2 OBJECT METHODS
 
 =over 11
