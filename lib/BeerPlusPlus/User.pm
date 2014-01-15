@@ -219,11 +219,11 @@ sub get_timestamps($) {
 	return @{$self->{times}};
 }
 
-=item $user->consume()
+=item $user->consume([$time])
 
 Increments the user's count by one by adding the current timestamp. The
-updated count is returned. Optionally the time can be specified as second
-argument.
+updated count is returned. Optionally the time can be specified as argument.
+The timestamps are always inserted and persisted ordered by time.
 
 =cut
 
@@ -232,6 +232,7 @@ sub consume($;$) {
 	my $time = shift || time;
 
 	push $self->{times}, $time;
+	@{$self->{times}} = sort @{$self->{times}};
 	$self->persist();
 
 	return $self->get_count();

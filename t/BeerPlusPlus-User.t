@@ -47,3 +47,13 @@ is(scalar @others, 1, "loaded the other user");
 is(ref $others[0], 'BeerPlusPlus::User', "loaded user is object");
 is_deeply($others[0], $other, "loaded user is equals to created other user");
 
+# test insertion of timestamps ordered by time
+my $to_username = 'time-ordered';
+BeerPlusPlus::User->create($to_username);
+my $to_user = BeerPlusPlus::User->new($to_username);
+my $time = time;
+$to_user->consume($time + 100);
+$to_user->consume($time - 100);
+is_deeply([ $to_user->get_timestamps() ], [ $time - 100, $time + 100 ],
+		"test insertion of timestamps ordered by times");
+
