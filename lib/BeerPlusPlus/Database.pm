@@ -50,7 +50,8 @@ each possible hash-array-scalar combination can be stored.
 
 use Carp;
 use File::Path 'make_path';
-use Mojo::JSON 'j';
+#use Mojo::JSON 'j';
+use JSON::PP;
 use Scalar::Util qw(blessed reftype);
 
 
@@ -63,11 +64,19 @@ use Scalar::Util qw(blessed reftype);
 This variable hold the path to the root directory of the database. Within this
 directory all stores are located which in turn contain the data.
 
+=cut
+
+our $DATADIR = 'db';
+
+=item JSON
+
+An instance of JSON::PP which defaults to print pretty formatted JSON.
+
 =back
 
 =cut
 
-our $DATADIR = 'db';
+our $JSON = JSON::PP->new->pretty(1);
 
 
 =head2 METHODs
@@ -161,7 +170,7 @@ sub load($$) {
 	} else {
 		my $data = join "", <FILE>;
 		close FILE or carp "cannot close $path: $!";
-		return j($data);
+		return $JSON->decode($data);
 	}
 }
 
@@ -196,7 +205,7 @@ sub store($$$) {
 		carp "cannot open $path: $!";
 		return 0;
 	} else {
-		print FILE j($hash);
+		print FILE $JSON->encode($hash);
 		close FILE or carp "cannot close $path: $!";
 		return 1;
 	}
