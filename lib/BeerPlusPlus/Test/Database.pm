@@ -39,6 +39,7 @@ after the application terminated.
 
 
 use BeerPlusPlus::Database;
+use Carp;
 use File::Basename;
 use File::Temp 'tempdir';
 
@@ -56,8 +57,13 @@ during this module is loaded.
 =cut
 
 sub reset_datadir() {
-	my $template = dirname($0) . '/db.XXXXXXX';
-	$BeerPlusPlus::Database::DATADIR = tempdir($template, CLEANUP => 1);
+	my $template = 'db.XXXXXXX';
+	my $tempdir = tempdir($template, DIR => dirname($0), CLEANUP => 1);
+
+	croak("insufficient permissions for tempdir '$tempdir'")
+			unless -r $tempdir and -w $tempdir and -x $tempdir;
+
+	$BeerPlusPlus::Database::DATADIR = $tempdir;
 }
 
 =back
