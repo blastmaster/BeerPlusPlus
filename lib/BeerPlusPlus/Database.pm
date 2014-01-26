@@ -170,7 +170,7 @@ sub load($$) {
 	} else {
 		my $data = join "", <FILE>;
 		close FILE or carp "cannot close $path: $!";
-		return $JSON->decode($data);
+		return $data ? $JSON->decode($data) : {};
 	}
 }
 

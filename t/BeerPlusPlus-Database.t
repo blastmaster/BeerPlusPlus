@@ -43,6 +43,12 @@ my $hobj = bless { data => 'xyz' }, 'Test';
 ok($db->store("bhr", $hobj), "store blessed hash-reference succeeds");
 
 
+my $e_id = 'empty';
+open F, '>', $db->fullpath($e_id) and close F; # touch file
+ok($got = $db->load($e_id), "loading empty data-file");
+is_deeply($got, {}, "loaded hash of empty file is empty");
+
+
 BeerPlusPlus::Test::Database::reset_datadir();
 
 chmod 0000, "$BeerPlusPlus::Database::DATADIR";
