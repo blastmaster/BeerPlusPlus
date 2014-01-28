@@ -71,6 +71,8 @@ sub reset_datadir() {
 =cut
 
 
+# TODO set signal handlers which remove directory if test is aborted
+
 reset_datadir();
 
 
