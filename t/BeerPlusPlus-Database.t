@@ -52,7 +52,21 @@ ok($got = $db->load($e_id), "loading empty data-file");
 is_deeply($got, {}, "loaded hash of empty file is empty");
 
 
-unlink for glob $db->{base} . "/*";
+is($db->remove('<non-existent.file>'), undef, "removing non-existent file results in undef");
+
+my $rm_id = 'test-remove';
+$db->store($rm_id, {});
+ok($db->remove($rm_id), "removing existent db-entry '$rm_id' results in true/1");
+ok(! $db->exists($rm_id), "db-entry does not exist after deletion");
+
+# TODO test remove-method w/o permissions (simply chmod/chown does not work
+#      due to the user is still the owner and cannot be changed if not root)
+#$db->store($rm_id, {});
+#ok(! $db->remove($rm_id), "removing db-entry w/o permission fails");
+#ok(defined $!, "failure during deletion of db-entry sets \$!");
+
+
+$db->remove($_) for $db->list();
 is($db->list(), 0, "list returns 0 if database is empty");
 
 

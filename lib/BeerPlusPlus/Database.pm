@@ -23,6 +23,10 @@ our $VERSION = '0.04';
   $db->exist('data_id') or warn "db-entry 'data_id' does not exist";
   $db->store(data_id => \%data) or warn "cannot store db-entry 'data_id'";
   $data = $db->load('data_id') or warn "cannot load db-entry 'data_id'";
+  $db->remove('data_id') or warn "cannot remove db-entry 'data_id': $!";
+
+  # empty database
+  $db->remove($_) for $db->list();
 
 =head1 DESCRIPTION
 
@@ -214,6 +218,23 @@ sub store($$$) {
 		close FILE or carp "cannot close $path: $!";
 		return 1;
 	}
+}
+
+=item $db->remove($data_id) or warn "cannot remove $data_id: $!"
+
+Removes the entry associated to the given data-ID. Returns true/1 on success;
+false/0 otherwise while C<$!> will be set I<except> the data-ID does not exist
+in which case C<undef> will be returned.
+
+=cut
+
+sub remove($$) {
+	my $self = shift;
+	my $data_id = shift;
+
+	return undef unless $self->exists($data_id);
+
+	return unlink $self->fullpath($data_id);
 }
 
 =back
