@@ -12,7 +12,7 @@ BeerPlusPlus::Database - interface to the persistance layer of beer++
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS
@@ -95,11 +95,11 @@ sub new($$) {
 	my $class = shift;
 	my $store_id = shift;
 
+	my $base = "$DATADIR/$store_id";
 	my $self = {
-		base => "$DATADIR/$store_id",
+		base => $base,
+		init => -f $base || 0,
 	};
-
-	make_path($self->{base}, { mode => 0755 });
 
 	return bless $self, $class;
 }
@@ -115,7 +115,7 @@ sub exists($$) {
 	my $self = shift;
 	my $data_id = shift;
 
-	return -f $self->fullpath($data_id);
+	return $self->{init} && -f $self->fullpath($data_id);
 }
 
 =item $db->fullpath($data_id)
@@ -145,6 +145,7 @@ Returns a list of all existent data-IDs.
 sub list($) {
 	my $self = shift;
 
+	return () unless $self->{init};
 	return grep { s/(.*\/|\.json$)//g } glob $self->{base} . '/*.json';
 }
 
@@ -198,6 +199,10 @@ sub store($$$) {
 			return 0;
 		}
 	}
+
+
+	make_path($self->{base}, { mode => 0755 }) and $self->{init} = 1
+			unless $self->{init};
 
 	my $path = $self->fullpath($data_id);
 	

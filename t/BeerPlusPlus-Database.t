@@ -14,9 +14,12 @@ BEGIN { use_ok('BeerPlusPlus::Database') }
 my $db = BeerPlusPlus::Database->new('test');
 my ($id, $expected, $got) = 'entry';
 
+is($db->list(), undef, "list returns undef if database is not initialized");
+
 ok(! $db->exists($id), "db-entry '$id' does not exist");
 $expected->{test} = 'succeeded';
 ok($db->store($id, $expected), "store db-entry '$id' successfully");
+is($db->list(), 1, "database contains one entry");
 
 ok($db->exists($id), "db-entry '$id' does exist (after creation)");
 ok($got = $db->load($id), "load db-entry '$id' successfully");
@@ -47,6 +50,10 @@ my $e_id = 'empty';
 open F, '>', $db->fullpath($e_id) and close F; # touch file
 ok($got = $db->load($e_id), "loading empty data-file");
 is_deeply($got, {}, "loaded hash of empty file is empty");
+
+
+unlink for glob $db->{base} . "/*";
+is($db->list(), 0, "list returns 0 if database is empty");
 
 
 BeerPlusPlus::Test::Database::reset_datadir();
