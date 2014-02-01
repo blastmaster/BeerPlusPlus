@@ -11,10 +11,10 @@ use Test::More 'no_plan';
 BEGIN { use_ok('BeerPlusPlus::Database') }
 
 
-my $db = BeerPlusPlus::Database->new('test');
-my ($id, $expected, $got) = 'entry';
+my ($db, $id, $expected, $got) = (undef, 'entry', {}, {});
+silent { $db = BeerPlusPlus::Database->new('test') };
 
-is($db->list(), undef, "list returns undef if database is not initialized");
+ok(! defined $db->list(), "list returns undef if database is not initialized");
 
 ok(! $db->exists($id), "db-entry '$id' does not exist");
 $expected->{test} = 'succeeded';
@@ -72,7 +72,16 @@ is($db->list(), 0, "list returns 0 if database is empty");
 
 BeerPlusPlus::Test::Database::reset_datadir();
 
+# TODO improve test
 chmod 0000, "$BeerPlusPlus::Database::DATADIR";
-eval "BeerPlusPlus::Database->new('fail')";
+silent { eval "BeerPlusPlus::Database->new('fail')" };
 ok(! $?, "creating db w/o permissions fails fatally");
+
+
+BeerPlusPlus::Test::Database::reset_datadir();
+
+mkdir "$BeerPlusPlus::Database::DATADIR/245";
+$db = BeerPlusPlus::Database->new(0xF5);
+ok(defined $db->list(), "database is initialized");
+is_deeply( [ $db->list() ], [], "database is still empty");
 

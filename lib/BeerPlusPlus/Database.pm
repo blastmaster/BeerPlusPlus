@@ -102,8 +102,10 @@ sub new($$) {
 	my $base = "$DATADIR/$store_id";
 	my $self = {
 		base => $base,
-		init => -f $base || 0,
+		init => -d $base || 0,
 	};
+
+	carp("database '$store_id' not initialized") unless $self->{init};
 
 	return bless $self, $class;
 }
