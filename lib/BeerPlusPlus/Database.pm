@@ -80,7 +80,7 @@ An instance of JSON::PP which defaults to print pretty formatted JSON.
 
 =cut
 
-our $JSON = JSON::PP->new->pretty(1);
+our $JSON = JSON::PP->new->pretty(1)->canonical(1);
 
 
 =head2 METHODs
