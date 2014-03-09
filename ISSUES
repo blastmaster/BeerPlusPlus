@@ -1,0 +1,9 @@
+
+* write test for BeerPlusPlus::Database with multiple threads/processes due to
+  the parallelism of the Mojo webserver. assumed is an unexpected behavior if
+  through two user-objects the store-subroutine is called but due to the single
+  instance of the database the bug could may be created while a race condition
+  between processes[ok?]/threads[bad] (i.e. through the store-subroutine; see
+  that subroutine for a detailed description of precise location on the assumed
+  bug)
+

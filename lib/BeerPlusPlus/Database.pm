@@ -217,6 +217,9 @@ sub store($$$) {
 			unless $self->{init};
 
 	my $path = $self->fullpath($data_id);
+
+	# FIXME between THIS lines P1 overtake P2 and the database of user B
+	# instead of user A is rewritten
 	
 	unless (open FILE, '>', $path) {
 		carp "cannot open $path: $!";
