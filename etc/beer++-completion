@@ -1,31 +1,67 @@
 #! /bin/bash
 
+for completion in "$(dirname "$BASH_SOURCE")"/beer++*.comp; do
+	. "$completion"
+done
+
+
 function _beer_complete_options() {
 	COMPREPLY=( $(compgen -W "--help" -- "$cur") )
 }
 
-function _beer_complete_subcmds() {
-	local PERL5LIB="$(dirname $BASH_SOURCE)/../lib:$PERL5LIB"
-#	COMPREPLY=( $(compgen -W "$(perl -MBeerPlusPlus::Command=commands \
-#			-E 'say join "\n", map { $_->name } commands')" -- "$cur") )
-	COMPREPLY=( $(compgen -W "start help git stock" -- "$cur") )
+#
+# usage: _beer_complete_files <path> [suffix]
+#
+# * suffix is removed automatically (this is due it is most used case)
+# * if searching for some files and suffix should not be removed simple
+#   append it after calling this function:
+#
+#	  _beer_complete_files db/users "$suffix"
+#     COMPREPLY=( "${COMPREPLY[@]/#/$suffix}" )
+#
+#   for example to search for 'user' which is actual 'user.json' but
+#   leave suffix '.json':
+#
+#	  _beer_complete_files db/users '\.json'
+#     COMPREPLY=( "${COMPREPLY[@]/%/.json}" )
+#
+#   to apply parameter expansion before compgen is called simply specify
+#   them after the suffix, e.g.
+#
+#     # lowercase the found filenames and prepend 'x' to each result
+#     _beer_complete_files lib/BeerPlusPlus/Command .pm ',*' '/#/x'
+#
+# * result is APPENDED to COMPREPLY array
+#
+function _beer_complete_files() {
+	local dir="$(dirname $BASH_SOURCE)/../$1"
+	local suffix=$2
+	shift 2
+
+	local IFS=$'\n'
+	local files=( $(ls "$dir" | grep -Po "^.+(?=$suffix$)") )
+	while [ $# -gt 0 ]; do
+		eval "files=( \"\${files[@]$1}\" )"
+		shift
+	done
+
+	COMPREPLY+=( $( compgen -W "${files[*]}" -- "$cur") )
+}
+
+function _beer_complete_commands() {
+	_beer_complete_files lib/BeerPlusPlus/Command .pm ',*' # lowercase
 }
 
 function _beer_complete_store() {
-	local base="$(dirname "$BASH_SOURCE")/../db/$1"
-	COMPREPLY=( $(compgen -W "$(ls "$base/*.json" \
-			| perl -pe 's/\.json$//')"-- "$cur") )
+	_beer_complete_files "db/$1" '\.json'
 }
 
 function _beer_complete_stores() {
-	local base="$(dirname "$BASH_SOURCE")/../db"
-	COMPREPLY=( $(compgen -W "$(ls "$base")" -- "$cur") )
+	_beer_complete_files db
 }
 
-function _beer_complete_git() {
-	COMP_WORDS=( ${COMP_WORDS[1]} ${COMP_WORDS[@]:3:COMP_CWORD} )
-	COMP_CWORD=$(($COMP_CWORD - 2))
-	_git
+function _beer_complete_cmd_help() {
+	_beer_complete_commands
 }
 
 function _beer() {
@@ -38,31 +74,16 @@ function _beer() {
 				_beer_complete_options
 				;;
 			*)
-				_beer_complete_subcmds
+				_beer_complete_commands
 				;;
 		esac
 	else
 		local cmd=${COMP_WORDS[1]}
-		case "$cmd" in
-			stock)
-				_beer_complete_store stocks
-				;;
-			git)
-				if [ $COMP_CWORD -eq 2 ]; then
-					_beer_complete_stores
-				else
-					_beer_complete_git
-				fi
-				;;
-			help)
-				_beer_complete_subcmds
-				;;
-			*)
-				if declare -f _beer_$cmd &> /dev/null; then
-					_beer_$cmd
-				fi
-				;;
-		esac
+		if declare -F _beer_complete_cmd_"$cmd" > /dev/null; then
+			_beer_complete_cmd_"$cmd" "$@"
+		else
+			COMPREPLY=( $(compgen -o default) )
+		fi
 	fi
 }
 
