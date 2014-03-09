@@ -7,6 +7,7 @@ use feature 'say';
 
 
 use BeerPlusPlus::Test::Database;
+BEGIN { mkdir for glob "$BeerPlusPlus::Database::DATADIR/{users,stocks}" }
 
 use Test::More 'no_plan';
 BEGIN { use_ok('BeerPlusPlus::Billing') }
