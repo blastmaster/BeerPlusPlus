@@ -83,7 +83,7 @@ function _beer() {
 		if declare -F _beer_complete_cmd_"$cmd" > /dev/null; then
 			_beer_complete_cmd_"$cmd" "$@"
 		else
-			COMPREPLY=( $(compgen -o default) )
+			COMPREPLY=( $(compgen -o default -- "$cur") )
 		fi
 	fi
 }
