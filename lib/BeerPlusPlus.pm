@@ -96,7 +96,7 @@ HTML
 	my $current = $self->url_for('current');
 
 	my @links;
-	for my $path (keys %pages) {
+	for my $path (sort keys %pages) {
 		next if $path eq $current;
 		push @links, $self->link_to($pages{$path} => $path);
 	}
