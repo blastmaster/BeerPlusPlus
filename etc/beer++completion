@@ -1,8 +1,9 @@
 #! /bin/bash
 
-for completion in "$(dirname "$BASH_SOURCE")"/beer++*.comp; do
+for completion in "$(dirname "$BASH_SOURCE")"/beer++completion.*; do
 	. "$completion"
 done
+unset completion
 
 
 function _beer_complete_options() {
