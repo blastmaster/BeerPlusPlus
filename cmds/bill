@@ -1,0 +1,304 @@
+#! /usr/bin/env perl
+
+#use v5.14; # due to shift $ref
+
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+use BeerPlusPlus::Stock ':vars';
+use BeerPlusPlus::User;
+
+use Data::Printer;
+
+
+#
+# 1. order stock charges by time
+# 2. order user consumed beer by time
+# 3. relate user to charge by time
+# 4. calculate bill
+# 5. generated detailed report
+#
+#   * average beer price
+#   * periods and pricings
+#
+
+
+package BeerPlusPlus::Bill::Charge;
+
+sub new($$) {
+	my $class = shift;
+	my $charge = shift;
+
+	my $self = {
+		charge => $charge,
+		bottles => $charge->amount,
+		consumers => {},
+	};
+
+	return bless $self, $class;
+}
+
+sub is_empty($) {
+	my $self = shift;
+
+	return $self->{bottles} == 0;
+}
+
+sub consume_by($$$) {
+	my $self = shift;
+	my $user = shift;
+	my $time = shift;
+
+	$self->{bottles}--;
+	if ($self->is_empty()) {
+		my ($sec, $min, $hour, $day, $mon, $year) = localtime $time;
+		$year += 1900;
+		$mon += 1;
+		printf "user %s emptied charge (%s) on %02d.%02d.%d\n", $user,
+				$self->{charge}->date, $day, $mon, $year;
+		# TODO try to reconstruct when blastmaster bought some beer
+	}
+
+	$self->{consumers}->{$user} = 0
+			unless defined $self->{consumers}->{$user};
+	$self->{consumers}->{$user}++;
+}
+
+sub get_stock($) {
+	my $self = shift;
+
+	return $self->{charge}->stock();
+}
+
+
+package BeerPlusPlus::Bill;
+
+sub new($$) {
+	my $class = shift;
+	my $user = shift;
+
+	my $self = {
+		user => $user,
+		pay => {},
+	};
+
+	return bless $self, $class;
+}
+
+sub pay($$$) {
+	my $self = shift;
+	my $charge = shift;
+	my $amount = shift;
+
+	my $stock = $charge->get_stock();
+	my $name = $stock->get_user();
+
+	$self->{pay}->{$name} = 0 unless defined $self->{pay}->{$name};
+	$self->{pay}->{$name} += $charge->{charge}->price * $amount;
+}
+
+sub to_string($) {
+	my $self = shift;
+}
+
+
+package main;
+
+
+my @charges;
+my %charges;
+for my $entry (BeerPlusPlus::Stock->list()) {
+	my $stock = BeerPlusPlus::Stock->new($entry);
+
+	for my $charge ($stock->get_charges()) {
+		my $bill_charge = BeerPlusPlus::Bill::Charge->new($charge);
+
+		push @charges, $bill_charge;
+
+		my $time = $charge->time;
+		$charges{$time} = [] unless defined $charges{$time};
+		push $charges{$time}, $bill_charge;
+	}
+}
+
+my $b_count = 0;
+for my $charges (values %charges) {
+	$b_count += $_->{charge}->amount for @{$charges};
+}
+say "stock was filled ", scalar keys %charges, " times, total: $b_count";
+
+
+my %bills;
+my %beers;
+for my $name (BeerPlusPlus::User->list()) {
+	my $user = BeerPlusPlus::User->new($name);
+
+	$bills{$name} = BeerPlusPlus::Bill->new($user);
+
+	my @timestamps = $user->get_timestamps();
+	say $user->{user}, ": " . @timestamps;
+
+	for my $time (@timestamps) {
+		$beers{$time} = [] unless defined $beers{$time};
+		push $beers{$time}, $name;
+	}
+}
+
+my $t_count = 0;
+$t_count += @{$_} for values %beers;
+say "beer consumed: $t_count";
+
+
+my $count = 0;
+for my $time (sort keys %beers) {
+	my @users = @{$beers{$time}};
+
+	my $charge;
+	for my $user (@users) {
+		$count++;
+		if (not defined $charge or $charge->is_empty()) {
+			my ($next) = sort keys %charges;
+			die "not enough beer ($count)" unless $next;
+			$charge = shift $charges{$next};
+#			say "deleteing \$charges{$next}" unless @{$charges{$next}};
+			delete $charges{$next} unless @{$charges{$next}};
+		}
+
+		$charge->consume_by($user, $time);
+	}
+
+	unless ($charge->is_empty()) {
+		my $time = $charge->{charge}->time;
+		if (defined $charges{$time}) {
+			unshift $charges{$time}, $charge;
+		} else {
+			$charges{$time} = [ $charge ];
+		}
+	}
+}
+
+
+for my $charge (@charges) {
+	while (my ($consumer, $amount) = each $charge->{consumers}) {
+		$bills{$consumer}->pay($charge, $amount);
+	}
+}
+
+for my $bill (values %bills) {
+	say '=' x 50;
+	say "bill for ", $bill->{user}->get_name;
+
+	my $total = 0;
+	for my $provider (keys $bill->{pay}) {
+		my $sum = $bill->{pay}->{$provider};
+		printf "> pay %d.%02d€ to %s\n", $sum / 100, $sum % 100, $provider;
+		$total += $sum;
+	}
+
+	printf "total: %d.%02d€\n", $total / 100, $total % 100;
+}
+
+
+__END__
+
+my @stocks;
+for my $time (sort keys %stocks) {
+	my $stock = $stocks{$time};
+	push @stocks, @{$stock};
+}
+# TODO ...
+
+sub get_stock($) {
+	my $time = shift;
+
+	return undef unless keys %stocks;
+
+	for my $key (sort keys %stocks) {
+		return delete $stocks{$key}, $key if $key < $time;
+	}
+
+	my ($first) = sort keys %stocks;
+	return delete $stocks{$first}, $first;
+}
+
+sub time2fmt($;$) {
+	my $time = shift;
+	my $fmt = shift || "%d-%02d-%02d - %02d:%02d:%02d",
+
+	my ($sec, $min, $hour, $day, $mon, $year) = localtime $time;
+	$mon += 1;
+	$year += 1900;
+
+	return sprintf $fmt, $year, $mon, $day, $hour, $min, $sec;
+}
+
+my %bill;
+my $missing = 0;
+for my $time (sort keys %users) {
+#	say time2fmt($time);
+#	say ">>> ", $users{$time}->[0]->{user};
+
+	sum: {
+		my ($stock, $approx) = get_stock($time);
+		unless ($stock) {
+#			warn "no beer in stock...";
+			$missing++;
+			last;
+		}
+
+		if (@{$users{$time}} <= @{$stock}) {
+			my $count = 0;
+			for my $user (@{$users{$time}}) {
+				my $name = $user->{user};
+				$count++;
+#				say "> $name [$count]";
+
+				$bill{$name} = [] unless defined $bill{$name};
+				push $bill{$name}, shift $stock;
+			}
+
+			$stocks{$approx} = $stock if @{$stock};
+		} else {
+			my $count = 0;
+			for (@{$stock}) {
+				my $user = shift $users{$time};
+				my $name = $user->{user};
+				$count++;
+#				say "> $name [$count]";
+
+				$bill{$name} = [] unless defined $bill{$name};
+				push $bill{$name}, $_;
+			}
+
+			redo sum;
+		}
+	}
+}
+
+say "no beer in stock: missing $missing beer" if $missing;
+
+my $guest_sum = 0;
+$guest_sum += $_ for @{delete $bill{guest}};
+printf "guest: %d.%02d€\n", $guest_sum / 100, $guest_sum % 100;
+
+my $guest_part = $guest_sum / keys %bill;
+
+my $total = 0;
+while (my ($user, $bottles) = each %bill) {
+	my $sum = 0;
+	$sum += $_ for @{$bottles};
+	$sum += $guest_part;
+
+	$total += $sum;
+
+	printf "%s: %d.%02d€\n", $user, $sum / 100, $sum % 100;
+}
+
+$b_count = 0;
+$b_count += @{$_} for values %stocks;
+say "remaining beer in stock: $b_count";
+printf "total: %d.%02d€\n", $total / 100, $total % 100;
+
