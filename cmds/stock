@@ -1,0 +1,90 @@
+#! /usr/bin/env perl
+
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+use BeerPlusPlus::Stock ':vars';
+use BeerPlusPlus::Command::Stock;
+
+use Time::Local;
+
+
+sub list($);
+sub add($@);
+
+
+my $user = shift or die "fatal: no user given!";
+die "fatal: user does not exist" unless BeerPlusPlus::Stock->exists($user);
+my $stock = BeerPlusPlus::Stock->new($user);
+
+unless (@ARGV) {
+	list($stock);
+} else {
+	add($stock, @ARGV);
+}
+
+
+sub list($) {
+	my $stock = shift;
+
+	my @charges = $stock->get_charges();
+	unless (@charges) {
+		say "no charges listed";
+		return;
+	}
+
+#	$DEPOSIT_CRATE = $DEPOSIT_BOTTLE = 0;
+
+	my $total = 0;
+	for my $charge ($stock->get_charges()) {
+		say $charge->to_string();
+		$total += $charge->price * $charge->amount;
+	}
+#	say join "\n", map { $_->to_string } $stock->get_charges();
+#	my $total = 0;
+	printf "total:%39s", sprintf "%d.%02d€\n", $total / 100, $total % 100;
+}
+
+#
+# specify price in cents! price can be repeated by <n>x<price> e.g. 3x2640
+#
+sub add($@) {
+	my $stock = shift;
+	my @args = @_;
+
+	$stock->fill(parse_arg($_)) for @args;
+
+	return;
+
+	@args = map { s/^(\d+)x// ? ($_) x $1 : $_ } @args;
+	my $year = (localtime time)[5];
+	my %args;
+	for (@args) {
+		unless (/(\d{2}).(\d{2}).(\d{2,4})?=(\d+)/) {
+			warn "bad argument: $_";
+			next;
+		}
+
+		my $time = timelocal(0, 0, 12, $1, $2 -1, $3 || $year);
+		my $price = $4;
+
+		$args{$time} = [] unless defined $args{$time};
+		push $args{$time}, $price;
+	}
+
+#	while (my ($time, $prices) = each %args) {
+#		my ($sec, $min, $hour, $day, $mon, $year) = localtime $time;
+#		$mon += 1;
+#		$year += 1900;
+#		my $date = sprintf "[%d-%02d-%02d|%02d:%02d:%02d]",
+#				$year, $mon, $day, $hour, $min, $sec;
+#		say "$date = $_" for @{$prices};
+#	}
+#	return;
+
+	$stock->add_crates(%args);
+}
+

@@ -1,0 +1,156 @@
+#! /usr/bin/env perl
+
+use strict;
+use warnings;
+
+use feature 'say';
+
+
+use BeerPlusPlus::User;
+use Getopt::Long;
+use Time::Local;
+
+
+use constant SEC => 1;
+use constant MIN => 60 * SEC;
+use constant HOUR => 60 * MIN;
+use constant DAY => 24 * HOUR;
+use constant MIN_DIFF => 4 * HOUR;
+
+
+sub add_times($@);
+sub evaluate($);
+sub printime($);
+
+
+my $DATE_REGEX = qr/(\d{2})\.(\d{2})\.(\d{2})-(\d{2}):(\d{2}):(\d{2})/;
+my $DATERE = qr/(?<D>\d{2})\.(?<M>\d{2})\......./;
+
+
+my @dates;
+GetOptions(
+	'add-date=s' => sub {
+		say STDERR "invalid format, must be DD.MM.YY-HH:mm:ss" and exit 1
+				unless $_[1] =~ /$DATE_REGEX/;
+		push @dates, $_[1];
+	},
+);
+
+if (@dates) {
+	die "user must be specified!" unless @ARGV;
+	die "only one user should be specified!" if @ARGV > 1;
+	add_times(shift, @dates);
+	exit;
+}
+
+@ARGV = BeerPlusPlus::User->list() unless @ARGV;
+#die "no user(name)s specified!" unless @ARGV;
+
+for my $user (@ARGV) {
+	evaluate($user);
+	say "=" x 80;
+}
+
+
+sub add_times($@) {
+	my $username = shift;
+	my @dates = @_;
+
+	for (@dates) {
+		my ($day, $mon, $year, $hour, $min, $sec) = /$DATE_REGEX/;
+		$mon -= 1;
+		my $time = timelocal($sec, $min, $hour, $day, $mon, $year);
+		say printime($time);
+
+		my $user = BeerPlusPlus::User->new($username);
+		$user->consume($time);
+	}
+}
+
+# TODO correlate user data, e.g. sunday session stats over all users
+
+
+sub evaluate($) {
+	my $username = shift;
+
+	BeerPlusPlus::User->exists($username) or die "user does not exist";
+	my $user = BeerPlusPlus::User->new($username);
+	my @times = $user->get_timestamps();
+	say "username: $username";
+	say "email: " . (defined $user->get_email ? $user->get_email() : 'undefined');
+	say "total: " . @times;
+	print "\n";
+
+	my @ranges;
+	my $prev = 0;
+	for my $time (@times) {
+	#	say "++ ", printime($time);
+
+		push @ranges, [] if $prev + MIN_DIFF < $time;
+		push $ranges[$#ranges], $time;
+
+		$prev = $time;
+	}
+
+	say "encountered " . @ranges . " ranges";
+	my $r_count = 0; # my $r_count++  << works
+	for my $range (@ranges) {
+		my @r = grep {
+			my ($d, $h) = (localtime $_)[6, 2];
+			$d == 0 and $h >= 20 or $d == 1 and $h <= 5;
+		} @{$range};
+
+		next unless @r;
+
+		$r_count++;
+
+		say join "\n", map {
+			printime($r[$_]) . ($_ < $#r ? "  diff="
+				. int (($r[$_+1] - $r[$_]) / 60) : "")
+		} 0 .. $#r;
+		say "=" x 30;
+	}
+
+	say "encountered $r_count sunday sessions";
+
+	my @diffs;
+	for my $range (@ranges) {
+		next unless @{$range} > 1;
+
+		for (my $idx = 0; $idx < @{$range} -1; $idx++) {
+			my $diff = $range->[$idx +1] - $range->[$idx];
+			push @diffs, $diff if $diff > 10 * 60;
+		}
+	}
+
+	say "... thereof " . @diffs . " differences used for statistics";
+
+	#say "> ", join "\n> ", map { $_ / 60 } @diffs;
+
+	my $m_sum = 0;
+	$m_sum += $_ for @diffs;
+	my $mean = $m_sum / @diffs;
+	printf "mean = %dm\n", $mean / 60;
+
+	my $d_sum = 0;
+	# TODO which of the following both equations is right?
+	$d_sum += abs $_ - $mean for @diffs;
+#	$d_sum += ($_ - $mean) ** 2 for @diffs;
+	my $deviation = $d_sum / @diffs;
+
+	my $min = int ($deviation / 60);
+	my $sec = int ($deviation - $min * 60);
+	printf "deviation = %dm%ds\n", $min, $sec;
+}
+
+
+sub printime($) {
+	my $time = shift;
+
+	my ($sec, $min, $hour, $day, $mon, $year) = localtime $time;
+	$year += 1900;
+	$mon += 1;
+	return sprintf "%02d.%02d.%4d %02d:%02d:%02d",
+			$day, $mon, $year, $hour, $min, $sec;
+}
+
