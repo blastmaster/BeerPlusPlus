@@ -32,8 +32,7 @@ sub execute(@) {
 	my $store_dir = dirname($db->fullpath('location'));
 
 	chdir $store_dir;
-	local $" = "' '";
-	exec "git $gitcmd '@params'";
+	exec 'git', $gitcmd, @params;
 }
 
 
