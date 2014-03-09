@@ -74,6 +74,17 @@ sub startup {
 	%reg_pages = $self->initialize_plugins();
 }
 
+sub create_footer_link($$$) {
+	my $self = shift;
+	my $link = shift;
+	my $target = shift;
+
+	my $current = $self->url_for('current');
+	$target .= '#' if $current eq $target;
+
+	return $self->link_to($link => $target)
+}
+
 sub footer {
     my $self = shift;
 	my $spec = shift;
@@ -89,16 +100,13 @@ HTML
 
 	my %pages = (
 		%reg_pages,
-		'/welcome' => 'home',
 		'/chpw' => 'change password',
 		'/rules.pdf' => 'rules'
 	);
-	my $current = $self->url_for('current');
 
-	my @links;
+	my @links = ( create_footer_link($self, 'home' => '/welcome') );
 	for my $path (sort keys %pages) {
-		next if $path eq $current;
-		push @links, $self->link_to($pages{$path} => $path);
+		push @links, create_footer_link($self, $pages{$path} => $path);
 	}
 
 	my $links = join " |\n", @links;
