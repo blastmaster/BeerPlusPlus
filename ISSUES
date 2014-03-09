@@ -13,3 +13,7 @@
   * if store does not exist and init-attribute is set to false $db->exists(...)
     returns always false even if store was initialized manually after startup
 
+* if two different users are logging in on the same machine without logging
+  out the first user before logging in the second one, the cookie seems to be
+  overridden (maybe avoid this bug by add a random string to the cookie ID?)
+
