@@ -11,6 +11,14 @@
 			<td><%=password_field 'passwd', id => 'first' %></td>
 			<td><%=password_field 'passwd2', id => 'confirm' %></td>
 		</tr>
+        <tr>
+            <td><label for="email">email</label></td>
+            <td><label for="email_confirmation">confirmation</label></td>
+        </tr>
+        <tr>
+            <td><%=text_field 'email', id => 'first' %></td>
+            <td><%=text_field 'email2', id => 'confirm' %></td>
+        </tr>
 		<!--tr>
 			<td/>
 			<td><%= submit_button '++', id => 'regbut', class => 'banner pp', title => 'submit' %></td>
