@@ -45,7 +45,7 @@ sub serialize_stocks() {
 		}
 	}
 
-	my \@charges, %charges;
+	return \@charges, %charges;
 }
 
 
