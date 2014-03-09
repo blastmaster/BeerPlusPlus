@@ -1,13 +1,13 @@
 #! /bin/bash
 
 function _beer_complete_cmd_git() {
-	COMPREPLY=( $(compgen -W "pull status add commit push" -- "$cur") )
-#	if [ $COMP_CWORD -eq 2 ]; then
-#		_beer_complete_stores
-#	else
+	if [ $COMP_CWORD -eq 2 ]; then
+		_beer_complete_stores
+	else
 #		local COMP_WORDS=( ${COMP_WORDS[1]} ${COMP_WORDS[@]:3:COMP_CWORD} )
 #		local COMP_CWORD=$(($COMP_CWORD - 2))
 #		_git
-#	fi
+		COMPREPLY=( $(compgen -W "pull status add commit push" -- "$cur") )
+	fi
 }
 
