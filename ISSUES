@@ -7,3 +7,9 @@
   that subroutine for a detailed description of precise location on the assumed
   bug)
 
+* BeerPlusPlus::Database
+
+  * carp if DATADIR does not exist!
+  * if store does not exist and init-attribute is set to false $db->exists(...)
+    returns always false even if store was initialized manually after startup
+
