@@ -105,7 +105,12 @@ sub new($$) {
 		init => -d $base || 0,
 	};
 
-	carp("database '$store_id' not initialized") unless $self->{init};
+	unless ($self->{init}) {
+		carp("database '$store_id' not initialized");
+		croak("no write permissions for $DATADIR") unless -w $DATADIR;
+	} else {
+		croak("no write permissions for $base") unless -w $base;
+	}
 
 	return bless $self, $class;
 }
@@ -208,6 +213,7 @@ sub store($$$) {
 
 
 	make_path($self->{base}, { mode => 0755 }) and $self->{init} = 1
+			or croak("cannot create data-directory at " . $self->{base})
 			unless $self->{init};
 
 	my $path = $self->fullpath($data_id);
