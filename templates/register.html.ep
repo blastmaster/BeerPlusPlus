@@ -1,3 +1,4 @@
+<!-- vim:ft=html -->
 % layout 'basic', subtitle => 'change password';
 <!--span class="banner" style="font-size: 7.4em; line-height: 50%">change password</span-->
 <br/>
@@ -26,11 +27,5 @@
 	</table>
 	%= submit_button 'change', id => 'regbut', class => 'banner pp', title => 'submit'
 %end
-<div id="footer">
-	<span style="float: left">
-		<%=link_to 'home' => '/welcome' %> |
-		<%=link_to 'statistics' => '/statistics' %>
-	</span>
-	<span style="float: right"><%=link_to 'logout' => '/logout' %> |</span>
-</div>
+%=footer
 
