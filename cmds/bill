@@ -161,7 +161,8 @@ for my $time (sort keys %beers) {
 		$count++;
 		if (not defined $charge or $charge->is_empty()) {
 			my ($next) = sort keys %charges;
-			die "not enough beer ($count)" unless $next;
+#			die "not enough beer ($count)" unless $next;
+			goto NOT_ENOUGH_BEER unless $next;
 			$charge = shift $charges{$next};
 #			say "deleteing \$charges{$next}" unless @{$charges{$next}};
 			delete $charges{$next} unless @{$charges{$next}};
@@ -180,6 +181,8 @@ for my $time (sort keys %beers) {
 	}
 }
 
+NOT_ENOUGH_BEER:
+
 
 for my $charge (@charges) {
 	while (my ($consumer, $amount) = each $charge->{consumers}) {
@@ -187,12 +190,13 @@ for my $charge (@charges) {
 	}
 }
 
-for my $bill (values %bills) {
+for my $bill (sort { $a->{user}->get_name cmp $b->{user}->get_name } values %bills) {
 	say '=' x 50;
-	say "bill for ", $bill->{user}->get_name;
+	printf "bill for %s (consumed %d)\n", $bill->{user}->get_name,
+			scalar $bill->{user}->get_timestamps;
 
 	my $total = 0;
-	for my $provider (keys $bill->{pay}) {
+	for my $provider (sort keys $bill->{pay}) {
 		my $sum = $bill->{pay}->{$provider};
 		printf "> pay %d.%02d€ to %s\n", $sum / 100, $sum % 100, $provider;
 		$total += $sum;
