@@ -6,13 +6,133 @@ use warnings;
 use feature 'say';
 
 
-use BeerPlusPlus::Test::Database;
-BEGIN { mkdir for glob "$BeerPlusPlus::Database::DATADIR/{users,stocks}" }
+#use BeerPlusPlus::Test::Setup;
+#use BeerPlusPlus::Test::Database;
+#BEGIN { mkdir for glob "$BeerPlusPlus::Database::DATADIR/{users,stocks}" }
 
 use Test::More 'no_plan';
-BEGIN { use_ok('BeerPlusPlus::Billing') }
+BEGIN { use_ok('BeerPlusPlus::Billing', ':all') }
 
 
+use BeerPlusPlus::Stock;
+use BeerPlusPlus::User;
+
+use Data::Printer;
+
+
+#
+# TEST CASES
+# - handle same timestamp at the beginning
+#
+
+
+my @stocks = map { BeerPlusPlus::Stock->new($_) } BeerPlusPlus::Stock->list();
+my @charges = sort { $a->time <=> $b->time } map { $_->get_charges() } @stocks;
+my %users = map { $_ => BeerPlusPlus::User->new($_) } BeerPlusPlus::User->list();
+my @users = values %users;#map { $users{$_} } sort keys %users;
+my @timestamps = sort map { $_->get_timestamps() } @users;
+say scalar @timestamps, " timestamps...";
+#say join "\n", @timestamps;
+#__END__
+
+
+#my %consumptions = associate(@timestamps, @charges);
+##open C, '>', 'consumptions.' . time or die $!;
+##print C p(%consumptions);
+##close C or warn $!;
+#my $sum_c = 0;
+#$sum_c += @{$_} for values %consumptions;
+#say "$sum_c consumptions...";
+#my %bills = calculate_bills(@users, %consumptions);
+##open B, '>', 'bills.' . time or die $!;
+##print B p(%bills);
+##close B or warn $!;
+#__END__
+#my $sum = 0;
+#for my $user (sort keys %bills) {
+#	my $total = $bills{$user}->total;
+#	say "$user=$total¢";
+#	$sum += $total;
+#}
+#say "total: $sum¢";
+#
+#
+#
+#__END__
+#
+#my @consumptions;
+#for (1 .. 2) {
+#	my %consumptions = associate(@timestamps, @charges);
+#	push @consumptions, \%consumptions;
+#}
+#my $first_c = shift @consumptions;
+#is_deeply([ ($first_c) x @consumptions ], [ @consumptions ]);
+#
+#my @bills;
+#for my $consumptions (@consumptions) {
+#	my %bills = calculate_bills(@users, %{$consumptions});
+#	for my $user (sort keys %bills) {
+#		my $total = $bills{$user}->total;
+#		say "$user=$total";
+#	}
+#	push @bills, \%bills;
+#}
+#my $first_b = shift @bills;
+#is_deeply([ ($first_b) x @bills ], [ @bills ]);
+#
+#
+#
+#__END__
+#my %bills = calculate_bills(@users, %consumptions);
+#for my $user (sort keys %bills) {
+#	my $bill = $bills{$user};
+#
+#	printf "%s [%d/%d] -- %d.%02d\n", $user, scalar $users{$user}->get_timestamps(),
+#			scalar @{$bill->consumptions}, $bill->total / 100, $bill->total % 100;
+#}
+##distribute_guest_bill(%bills, @users{qw(blastmaster 8ward)});
+#my %checksums = calculate_checksums(%bills);
+##settle_bills(%bills, %checksums);
+#
+#for my $name (sort keys %bills) {
+#	my $bill = $bills{$name};
+#	my $user = $bill->user;
+#
+#	say '=' x 50;
+#	printf "bill for %s (consumed %d/%d)\n", $user->get_name,
+#			scalar $user->get_timestamps, scalar @{$bill->consumptions};
+#
+#	my $total = 0;
+#	my $payments = $bill->payments();
+#	for my $receiver (sort keys $payments) {
+#		next if $receiver eq $name;
+#
+#		my $amount = $payments->{$receiver};
+#		$total += $amount;
+#
+#		printf "> pay %d.%02d€ to %s\n",
+#				$amount / 100, $amount % 100, $receiver;
+#	}
+#	printf "total: %d.%02d€\n", $total / 100, $total % 100;
+#}
+#
+#for my $user (sort keys %checksums) {
+#	say "-" x 30;
+#	printf "%s receives...\n", $user;
+#
+#	my $total = 0;
+#	my $checksum = $checksums{$user};
+#	for my $debtor (sort keys $checksum) {
+#		next if $debtor eq $user;
+#		my $amount = $checksum->{$debtor};
+#		printf "> %d.%02d€ from %s\n", $amount / 100, $amount % 100, $debtor;
+#		$total += $amount;
+#	}
+#	printf "total: %d.%02d€\n", $total / 100, $total % 100;
+#}
+#
+#
+#__END__
 use BeerPlusPlus::User;
 use BeerPlusPlus::Stock ':vars';
 

@@ -24,9 +24,84 @@ our $VERSION = '0.01';
 =cut
 
 
-use BeerPlusPlus::Database;
+use POSIX 'ceil';
 
 
+sub new($$@) {
+	my $class = shift;
+	my $user = shift;
+	my @consumptions = sort { $a->{timestamp} <=> $b->{timestamp} } @_; # TODO write test to check this!
+
+	my $self = {
+		user => $user,
+		consumptions => \@consumptions,
+
+		# payments
+		# total
+	};
+
+	return bless $self, $class;
+}
+
+sub user($) {
+	my $self = shift;
+
+	return $self->{user};
+}
+
+sub consumptions($) {
+	my $self = shift;
+
+	return $self->{consumptions};
+}
+
+sub payments($) {
+	my $self = shift;
+
+	unless (defined $self->{payments}) {
+		my %payments;
+		for my $consumption (@{$self->consumptions}) {
+			my $charge = $consumption->{charge};
+			my $receiver = $charge->stock->get_user();
+			$payments{$receiver} = 0 unless defined $payments{$receiver};
+			$payments{$receiver} += $charge->price();
+		}
+
+		# round up total amount of the receiver
+		%payments = map { $_ => ceil($payments{$_}) } keys %payments;
+
+		$self->{payments} = \%payments;
+	}
+
+	return $self->{payments};
+}
+
+sub total($) {
+	my $self = shift;
+
+	unless (defined $self->{total}) {
+		my $total = 0;
+		for my $amount (values $self->payments()) {
+			$total += $amount;
+		}
+
+		$self->{total} = $total;
+	}
+
+	return $self->{total};
+}
+
+sub offset($) {
+	my $self = shift;
+
+	return scalar $self->consumptions();
+}
+
+#sub settle(
+
+
+
+__END__
 sub new($$) {
 	my $class = shift;
 	my $user = shift;
