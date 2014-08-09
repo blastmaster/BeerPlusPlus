@@ -129,7 +129,7 @@ sub exists {
 
 =over 4
 
-=item BeerPlusPlus->new($username)
+=item BeerPlusPlus::Stock->new($username)
 
 Creates a new stock for the given user or loads the associated one.
 
