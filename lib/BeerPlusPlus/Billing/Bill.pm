@@ -5,6 +5,7 @@ use warnings;
 
 use feature 'say';
 
+use BeerPlusPlus::Stock qw( :vars );
 
 =head1 NAME
 
@@ -24,12 +25,31 @@ our $VERSION = '0.01';
 =cut
 
 
-sub new ($)
+sub new ($$)
 {
     my $class = shift;
+    my $calculation = shift;
+    my $self = {
+        calculations => $calculation,
+    };
 
-    return bless {}, $class;
+    return bless $self, $class;
 }
+
+sub total
+{
+    my $self = shift;
+
+    my $sum = 0;
+    while (my ($receiver, $consumptions) = each $self->{calculations}) {
+        while (my ($price, $timestamps) = each $consumptions) {
+            $sum += ($price + $DEPOSIT_BOTTLE) * @{$timestamps};
+        }
+    }
+
+    return $sum;
+}
+
 
 #
 # {

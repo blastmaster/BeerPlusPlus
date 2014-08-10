@@ -172,7 +172,7 @@ sub calculate($) {
 
     # 6. load last markers
     # 7. discard timestamps before markers
-    my %bills;
+    my %calculations;
     for my $charge_key (keys %associations) {
         my $association = $associations{$charge_key};
         for my $username (keys $association) {
@@ -190,12 +190,12 @@ sub calculate($) {
             my $stock = $charge->stock();
             my $receiver = $stock->get_user();
 
-            $bills{$username} = {} unless exists $bills{$username};
-            $bills{$username}->{$receiver} = {}
-                    unless exists $bills{$username}->{$receiver};
-            $bills{$username}->{$receiver}->{$price} = []
-                    unless exists $bills{$username}->{$receiver}->{$price};
-            push $bills{$username}->{$receiver}->{$price},
+            $calculations{$username} = {} unless exists $calculations{$username};
+            $calculations{$username}->{$receiver} = {}
+                    unless exists $calculations{$username}->{$receiver};
+            $calculations{$username}->{$receiver}->{$price} = []
+                    unless exists $calculations{$username}->{$receiver}->{$price};
+            push $calculations{$username}->{$receiver}->{$price},
                     @relevant_timestamps;
 
             say "$username pays to $receiver " . ($price * @relevant_timestamps);
@@ -204,6 +204,11 @@ sub calculate($) {
 
 
     # 8. calculate bills
+    my %bills;
+    for my $user (keys %calculations) {
+       my $bill = BeerPlusPlus::Billing::Bill->new($calculations{$user});
+       $bills{$user} = $bill;
+    }
     p %bills;
 
     # 11. set markers for currently calculated bills
@@ -212,7 +217,7 @@ sub calculate($) {
         $billings{$username}->add($last_timestamp);
     }
 
-    return;
+    return %bills;
 }
 
 sub new($$) {
