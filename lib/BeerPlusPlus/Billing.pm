@@ -14,6 +14,8 @@ our %EXPORT_TAGS = ( all => [ qw(
 ) ] );
 our @EXPORT_OK = ( @{$EXPORT_TAGS{all}} );
 
+# TODO:
+# implement distribute guest_bill
 
 
 #
@@ -31,7 +33,6 @@ our @EXPORT_OK = ( @{$EXPORT_TAGS{all}} );
 use BeerPlusPlus::Database;
 use BeerPlusPlus::Stock qw( :vars );
 use BeerPlusPlus::User;
-use POSIX 'ceil';
 
 use Data::Printer;
 use Time::Piece;
@@ -163,9 +164,9 @@ sub calculate($) {
             $bottles--;
 
             my $t = localtime $timestamp;
-            printf "%s consumed a beer at %s %s from %s\n> bottles=%s\n",
-                    $username, $t->dmy, $t->hms, $charge->stock->get_user,
-                    $bottles;
+            #printf "%s consumed a beer at %s %s from %s\n> bottles=%s\n",
+                    #$username, $t->dmy, $t->hms, $charge->stock->get_user,
+                    #$bottles;
         }
     }
 
@@ -202,16 +203,29 @@ sub calculate($) {
         }
     }
 
-    p %calculations;
+    #p %calculations;
 
     # 8. calculate bills
     my %bills;
     for my $username (keys %calculations) {
-       my $bill = $billings{$username};
-       $bill->{calculation} = $calculations{$username};
-       $bills{$username} = $bill;
+        my $bill = $billings{$username};
+
+        $bill->{calculation} = $calculations{$username};
+
+        my %payments;
+        while (my ($receiver, $consumptions) = each $bill->{calculation}) {
+            next if $receiver eq $username;
+
+            my $sum = 0;
+            while (my ($price, $timestamps) = each $consumptions) {
+                $sum += ($price + $DEPOSIT_BOTTLE) * @{$timestamps};
+            }
+            $payments{$receiver} = $sum;
+        }
+        $bill->{payments} = \%payments;
+
+        $bills{$username} = $bill;
     }
-    p %bills;
 
     # 11. set markers for currently calculated bills
     while (my ($username, $user) = each %users) {
@@ -220,6 +234,27 @@ sub calculate($) {
     }
 
     return %bills;
+}
+
+# steps to do
+#
+# check all reveivers for each user
+# if receiver has also open payment to user
+# compare sums
+# charge dosen't matters just cash moneyz
+
+#{
+    #user2 => 12.32,
+    #user3 => 32.42,
+#}
+
+sub balance
+{
+    shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+
+    my %bills = @_;
+
+    return;
 }
 
 sub new($$) {
@@ -260,14 +295,19 @@ sub total
 {
     my $self = shift;
 
-    my $sum = 0;
-    while (my ($receiver, $consumptions) = each $self->{calculation}) {
-        while (my ($price, $timestamps) = each $consumptions) {
-            $sum += ($price + $DEPOSIT_BOTTLE) * @{$timestamps};
-        }
+    my $total = 0;
+    for my $amount (values $self->{payments}) {
+        $total += $amount;
     }
 
-    return $sum;
+    return $total;
+}
+
+sub payments
+{
+    my $self = shift;
+
+    return %{$self->{payments}};
 }
 
 sub persist
@@ -280,6 +320,21 @@ sub persist
 
     return $DB->store($self->{user}, $data);
 }
+
+sub to_string() {
+    my $self = shift;
+
+    printf "[%s]\n", $self->{user};
+
+    my $total = 0;
+    while (my ($receiver, $amount) = each $self->{payments}) {
+        printf "> pay %s cent to %s\n", $amount, $receiver;
+        $total += $amount;
+    }
+
+    say "> total: $total cent";
+}
+
 
 1;
 

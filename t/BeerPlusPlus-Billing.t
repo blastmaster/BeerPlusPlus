@@ -86,11 +86,27 @@ my %bills_1 = BeerPlusPlus::Billing->calculate();
 is(scalar keys %bills_1, 3, "must be 3 bills");
 # compare the bills in detail
 my $bill1 = $bills_1{$uname1};
-is($bill1->total, 3 * $price1 + 1 * $price2, "compare total sum of user 1");
+is($bill1->total, 1 * $price2, "compare total sum of user 1");
+is_deeply({ $bill1->payments() }, { $uname2 => 1 * $price2 });
 my $bill2 = $bills_1{$uname2};
-is($bill2->total, 2 * $price1 + 2 * $price2, "compare total sum of user 2");
+is($bill2->total, 2 * $price1, "compare total sum of user 2");
+is_deeply({ $bill2->payments() }, { $uname1 => 2 * $price1 });
 my $bill3 = $bills_1{$uname3};
 is($bill3->total, 1 * $price1 + 2 * $price2, "compare total sum of user 3");
+is_deeply({ $bill3->payments() }, { $uname1 => 1 * $price1, $uname2 => 2 * $price2 });
+
+$_->to_string() for values %bills_1;
+
+# BALANCING HARDCORE TODO
+#
+#my %balanced_bills = BeerPlusPlus::Billing->balance(%bills_1);
+#ok(not exists $balanced_bills{$uname1});
+#my $balanced2 = $balanced_bills{$uname2};
+#is($balanced2->total, 2 * $price1 + 1 * $price2, "compare total sum of user 2");
+#is_deeply({ $balanced2->payments(1) }, { $uname1 => 2 * $price1 - 1 * $price2 });
+#my $balanced3 = $balanced_bills{$uname3};
+#is($balanced3->total, 1 * $price1 + 2 * $price2, "compare total sum of user 3");
+#is_deeply({ $bill2->payments(1) }, { $uname1 => 1 * $price1, $uname2 => 2 * $price2 });
 
 #ok($u1_stock->is_empty(), "stock 1 is empty after consumption");
 #is($u2_stock->level(), 1, "one beer remains in stock 2 after consumption");
