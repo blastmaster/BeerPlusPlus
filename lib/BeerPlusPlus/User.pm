@@ -192,16 +192,6 @@ sub verify($$) {
 	return $password eq $self->{pass};
 }
 
-<<<<<<< HEAD
-sub get_users
-{
-    my $self = shift;
-    my @userlist = $self->get_usernames();
-    my @user_obj_list = map {
-        __PACKAGE__->new($self->{datadir})->init($_)
-    } @userlist;
-    return wantarray ? @user_obj_list : \@user_obj_list;
-=======
 =item $user->get_count()
 
 Returns the count which is actually the number of timestamps.
@@ -212,7 +202,6 @@ sub get_count($) {
 	my $self = shift;
 
 	return scalar $self->get_timestamps();
->>>>>>> 60bef8d8a9d8045bcb721e20f12e932b5c5685c9
 }
 
 =item $user->get_timestamps()
@@ -230,11 +219,11 @@ sub get_timestamps($) {
 	return @{$self->{times}};
 }
 
-=item $user->consume()
+=item $user->consume([$time])
 
 Increments the user's count by one by adding the current timestamp. The
-updated count is returned. Optionally the time can be specified as second
-argument.
+updated count is returned. Optionally the time can be specified as argument.
+The timestamps are always inserted and persisted ordered by time.
 
 =cut
 
@@ -243,6 +232,7 @@ sub consume($;$) {
 	my $time = shift || time;
 
 	push $self->{times}, $time;
+	@{$self->{times}} = sort @{$self->{times}};
 	$self->persist();
 
 	return $self->get_count();

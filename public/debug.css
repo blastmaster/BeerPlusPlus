@@ -1,0 +1,7 @@
+
+div#box, div#sidebar, div#page,
+div#header, div#content-scroll, div#footer,
+div#content {
+	border : 1px solid
+}
+

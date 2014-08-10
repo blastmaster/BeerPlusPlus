@@ -39,6 +39,15 @@ sub index
 	$self->redirect_to('/welcome');
 }
 
+sub is_auth
+{
+	my $self = shift;
+
+    return undef unless(exists $self->session->{pass}); # avoid referencing undefind entry
+	return 1 if $self->user->verify($self->session->{pass});
+	return $self->redirect_to('/index');
+}
+
 sub plusplus
 {
     my $self = shift;
@@ -47,28 +56,43 @@ sub plusplus
     $self->redirect_to('/welcome');
 }
 
-sub is_auth
+sub mail
 {
-	my $self = shift;
+    my $self = shift;
+    my ($mail, $repetition) = @_;
 
-	return 1 if $self->user->verify($self->session->{pass});
-	return $self->redirect_to('/index');
+    # TODO verify $mail
+    return undef if $mail ne $repetition;
+    return $self->user->set_email($mail);
+}
+
+sub password
+{
+    my $self = shift;
+    my ($password, $repetition) = @_;
+
+	return $self->render('register')
+			unless $self->check($password, $repetition);
+
+	my $newpw = $self->uman->hash($password);
+	$self->user->change_password($newpw)
+			or $self->log->error("change password failed");
+	$self->session->{pass} = $newpw;
 }
 
 sub register
 {
 	my $self = shift;
 
-	my $password = $self->param('passwd');
-	my $repetition = $self->param('passwd2');
 
-	return $self->render('register')
-			unless $self->check($password, $repetition);
-	
-	my $newpw = $self->uman->hash($password);
-	$self->user->change_password($newpw)
-			or $self->log->error("change password failed");
-	$self->session->{pass} = $newpw;
+	my $password = $self->param('passwd');
+	my $pw_repetition = $self->param('passwd2');
+
+    my $email = $self->param('email');
+    my $email_repetition = $self->param('email2');
+
+    $self->password($password, $pw_repetition) if ($password && $pw_repetition);
+    $self->mail($email, $email_repetition) if ($email && $email_repetition);
 
 	$self->redirect_to('/welcome');
 }
@@ -85,7 +109,6 @@ sub check
 sub logout
 {
 	my $self = shift;
-
 	%{ $self->session } = ();
 	$self->session(expires => 1);
 	my @byebyes = ('kree sha', 'lek tol');

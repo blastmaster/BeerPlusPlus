@@ -58,10 +58,8 @@ behind the block (since it's a regular subroutine call)!
 =cut
 
 sub silent(&) {
-	local *STDERR;
-	open STDERR, '>', '/dev/null' or die "cannot open /dev/null: $!";
+	local $SIG{__WARN__} = sub {};
 	shift->();
-	close STDERR or warn "cannot close /dev/null: $!";
 }
 
 =back
