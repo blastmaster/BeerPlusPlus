@@ -207,7 +207,7 @@ sub attach
 
 =item $mail->send($mail_host)
 
-This method gets the mail host which is the smtp host of the reciever.
+This method gets the mail host which is the smtp host of the receiver.
 Creates a new BeerPlusPlus::Mail::Mailer Object and pass the stored parameters
 to it. It also add attachements if defined before.
 
