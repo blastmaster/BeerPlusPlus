@@ -95,9 +95,8 @@ is($bill3->total, 1 * $price1 + 2 * $price2, "compare total sum of user 3");
 #ok($u1_stock->is_empty(), "stock 1 is empty after consumption");
 #is($u2_stock->level(), 1, "one beer remains in stock 2 after consumption");
 
-__END__
 $_->persist() for ($bill1, $bill2, $bill3);
-ok(BeerPlusBlus::Billing->exists($_)) for ($bill1, $bill2, $bill3);
+ok(BeerPlusPlus::Billing->exists($_)) for ($uname1, $uname2, $uname3);
 
 # user 1 fills the stock with 5 beer
 $u1_stock->fill($curtime, $price1 - $DEPOSIT_BOTTLE, 5);
@@ -109,7 +108,7 @@ $user3->consume($curtime + MIN);	    # drink from user 1
 $user2->consume($curtime + HOUR);	    # drink from user 1
 $user3->consume($curtime + HOUR + MIN); # drink from user 1
 # after a while the next billing is calculated
-%bills_2 = BeerPlusPlus::Billing->calculate();
+my %bills_2 = BeerPlusPlus::Billing->calculate();
 is(scalar keys %bills_2, 2, "must be 2 bills");
 my $bill4 = $bills_2{$uname2};
 is($bill4->total, 2 * $price1, "compare total sum of user 2");

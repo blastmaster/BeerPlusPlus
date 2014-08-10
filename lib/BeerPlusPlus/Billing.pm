@@ -28,9 +28,8 @@ our @EXPORT_OK = ( @{$EXPORT_TAGS{all}} );
 #
 
 
-use BeerPlusPlus::Billing::Bill;
 use BeerPlusPlus::Database;
-use BeerPlusPlus::Stock;
+use BeerPlusPlus::Stock qw( :vars );
 use BeerPlusPlus::User;
 use POSIX 'ceil';
 
@@ -92,10 +91,10 @@ sub calculate($) {
         my $billing = BeerPlusPlus::Billing->new($username);
         $billings{$username} = $billing;
 
-        my @previous_bills = @{$billing->get_bills()};
+        my @previous_markers= @{$billing->get_markers()};
         my $last_marker = 0;
-        if (@previous_bills) {
-            my $last_bill = $previous_bills[-1];
+        if (@previous_markers) {
+            my $last_bill = $previous_markers[-1];
             $last_marker = $last_bill->{marker};
         }
         $last_markers{$username} = $last_marker;
@@ -183,6 +182,7 @@ sub calculate($) {
                     push @relevant_timestamps, $timestamp;
                 }
             }
+            last unless @relevant_timestamps;
 
             my $charge = $charges{$charge_key};
             my $price = $charge->price();
@@ -202,12 +202,14 @@ sub calculate($) {
         }
     }
 
+    p %calculations;
 
     # 8. calculate bills
     my %bills;
-    for my $user (keys %calculations) {
-       my $bill = BeerPlusPlus::Billing::Bill->new($calculations{$user});
-       $bills{$user} = $bill;
+    for my $username (keys %calculations) {
+       my $bill = $billings{$username};
+       $bill->{calculation} = $calculations{$username};
+       $bills{$username} = $bill;
     }
     p %bills;
 
@@ -226,9 +228,10 @@ sub new($$) {
 
     my $self;
     unless ($DB->exists($user)) {
-        $self = { user => $user,
-                  bills => [],
-                };
+        $self = {
+            user => $user,
+            markers => [],
+        };
     }
     else {
         $self = $DB->load($user);
@@ -237,9 +240,9 @@ sub new($$) {
 	return bless $self, $class;
 }
 
-sub get_bills($) {
+sub get_markers($) {
     my $self = shift;
-    return $self->{bills};
+    return $self->{markers};
 }
 
 sub add($$) {
@@ -247,12 +250,36 @@ sub add($$) {
     my $consumption_timestamp = shift;
 
     my $timestamp = time;
-    push $self->{bills}, {
+    push $self->{markers}, {
         timestamp => $timestamp,
         marker => $consumption_timestamp
     };
 }
 
+sub total
+{
+    my $self = shift;
+
+    my $sum = 0;
+    while (my ($receiver, $consumptions) = each $self->{calculation}) {
+        while (my ($price, $timestamps) = each $consumptions) {
+            $sum += ($price + $DEPOSIT_BOTTLE) * @{$timestamps};
+        }
+    }
+
+    return $sum;
+}
+
+sub persist
+{
+    my $self = shift;
+    my $data = {
+        user => $self->{user},
+        markers => $self->{markers},
+    };
+
+    return $DB->store($self->{user}, $data);
+}
 
 1;
 
