@@ -309,6 +309,77 @@ sub balance
     return %bills;
 }
 
+sub balance_deeply {
+    shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
+
+    my %bills = @_;
+	for my $username (sort keys %bills) {
+		# 1. calculate minimas for each path
+		my $paths = balance_recursively(\%bills, $username);
+		# 2. find best path by $minima * ($nodes + ($end_node eq $username ? 1 : 0))
+		# 3. reckon up
+	}
+
+	for my $username (keys %bills) {
+		delete $bills{$username} unless keys $bills{$username}->{payments};
+	}
+
+	return %bills;
+}
+
+sub balance_recursively;
+sub balance_recursively {
+	my $bills = shift;
+	my $username = shift;
+	my $marked = shift || {};
+	my @payoffs = @_;
+
+	my $indent = "  " x keys $marked;
+	say "$indent> processing $username...";
+
+	if (exists $marked->{$username}) {
+		say "$indent  found cycle!";
+		my $minima = (sort @payoffs)[0];
+#		$marked->{$username} += $minima;
+		return $minima;
+	}
+
+	$marked->{$username} = 0;
+	my $bill = $bills->{$username};
+	my $payments = $bill->{payments};
+
+	my %paths;
+	# TODO sort receivers by highest payoffs
+#	while (my ($receiver, $payoff) = each $bill->{payments}) {
+	for my $receiver (sort keys $payments) {
+		my $payoff = $payments->{$receiver};
+
+		say "$indent  goto $receiver [$payoff]";
+
+		my $path = balance_recursively($bills, $receiver, $marked, @payoffs, $payoff);
+		$paths{$receiver} = $path if defined $path;
+		# balance debts to receiver by diff
+
+		# check if diffs > caller (?)
+		# sum up diffs
+
+#		$marked->{$receiver} += $diff;
+
+#		say "$indent  got diff=$diff";
+#		say "$indent  original[$receiver]=", $payments->{$receiver};
+#		$payments->{$receiver} -= $diff;
+#		say "$indent  balanced[$receiver]=", $payments->{$receiver};
+#		delete $payments->{$receiver}
+#				if $payments->{$receiver} == 0;
+	}
+
+	# check if diffs > caller (?)
+
+	say "$indent  return 0";
+	# return summed diffs
+	return keys %paths ? \%paths : undef;
+}
+
 sub new($$) {
 	my $class = shift;
     my $user = shift;

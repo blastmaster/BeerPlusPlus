@@ -131,3 +131,43 @@ is($bill4->total, 2 * $price1, "compare total sum of user 2");
 my $bill5 = $bills_2{$uname3};
 is($bill5->total, 2 * $price1 + 1 * $price2, "compare total sum of user 3");
 
+
+my %fake_bills = (
+	u1 => {
+		payments => {
+			u2 => 2,
+		},
+	},
+	u2 => {
+		payments => {
+			u3 => 3,
+		},
+	},
+	u3 => {
+		payments => {
+			u2 => 1,
+			u4 => 4,
+		},
+	},
+	u4 => {
+		payments => {
+			u1 => 5,
+			u2 => 2,
+		},
+	},
+);
+my %expected_balance = (
+	u3 => {
+		payments => {
+			u4 => 2,
+		},
+	},
+	u4 => {
+		payments => {
+			u1 => 3,
+		},
+	},
+);
+my %deeply_balanced = BeerPlusPlus::Billing->balance_deeply(%fake_bills);
+p %deeply_balanced;
+
