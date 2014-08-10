@@ -248,13 +248,65 @@ sub calculate($) {
     #user3 => 32.42,
 #}
 
+# %bill = {
+#   user => username,
+#   markers => [ <timestamps>+ ],
+#   payments => {
+#                   <receiver => payoff>+
+#               }
+# }
+
 sub balance
 {
     shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
 
     my %bills = @_;
 
-    return;
+    my @garbage;
+    for my $username (keys %bills) {
+        say "balancing $username...";
+        my $bill = $bills{$username};
+        my $payments = $bill->{payments};
+
+        for my $receiver (keys $payments) {
+#            next unless exists $payments->{$username};
+
+            say "> processing $receiver...";
+            my $r_bill = $bills{$receiver};
+            my $r_payments = $r_bill->{payments};
+            next unless exists $r_payments->{$username};
+
+            say "> found r_payoff:";
+            my $payoff = $payments->{$receiver};
+            p $payments unless defined $payoff;
+            my $r_payoff = $r_payments->{$username};
+
+            if ($payoff > $r_payoff) {
+                say "  $payoff > $r_payoff";
+                delete $r_payments->{$username};
+                p $r_payments->{$username};
+                $payments->{$receiver} -= $r_payoff;
+                p $payments->{$receiver};
+            }
+            elsif ($payoff < $r_payoff) {
+                say "  $payoff < $r_payoff";
+                $r_payments->{$username} -= $payoff;
+                delete $payments->{$receiver};
+            }
+            else {
+                say "  $payoff == $r_payoff";
+                delete $r_payments->{$username};
+                delete $payments->{$receiver};
+            }
+        }
+
+        unless (keys $payments) {
+            say "> removing $username from bills";
+            delete $bills{$username};
+        }
+    }
+
+    return %bills;
 }
 
 sub new($$) {
