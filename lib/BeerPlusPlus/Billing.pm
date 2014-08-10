@@ -309,6 +309,17 @@ sub balance
     return %bills;
 }
 
+#
+# TODO see debts of one user as single sum and try to distribute it optimally
+#      concerning the amount of transactions (handle stock and users separated
+#      and balance amount between providing users as last step (?))
+#
+#   stock1=100€, stock2=50€
+#   user1[s1]=20€, user1[s2]=30€, user2[s1]=40€, user3[s1]=40€, user3[s2]=20€
+#   -> user1=50€, user2=40€, user3=60€
+#   -> user1[s2]=50€, user2[s1]=40€, user3[s1]=60€
+#
+
 sub balance_deeply {
     shift if $_[0] eq __PACKAGE__ or ref $_[0] eq __PACKAGE__;
 
