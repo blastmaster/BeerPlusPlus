@@ -24,6 +24,26 @@ our $VERSION = '0.01';
 =cut
 
 
+sub new ($)
+{
+    my $class = shift;
+
+    return bless {}, $class;
+}
+
+#
+# {
+#   "user" : "user1",
+#   "bills" : [
+#     "<timestamp>" : "<consumption-timestamp>"
+#   ]
+# }
+#
+# package BeerPlusPlus::Cache::Bill;
+#
+# use parent "BeerPlusPlus::Bill";
+#
+
 1;
 __END__
 
