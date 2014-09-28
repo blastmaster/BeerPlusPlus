@@ -15,6 +15,8 @@ use BeerPlusPlus::User;
 
 use Data::Printer;
 
+use Time::Piece;
+
 
 my $LOG = Mojo::Log->new();
 my %reg_pages;
@@ -63,6 +65,10 @@ sub startup {
 			my $user = $self->user;
 			$self->stash(user => $user->get_name());
 			$self->stash(count => $user->get_count());
+			my @timestamps = $user->get_timestamps();
+			my $ts = localtime $timestamps[0];
+			my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
+			$self->stash(last => $last);
 			$self->render(template => 'welcome', format => 'html');
 		});
 
