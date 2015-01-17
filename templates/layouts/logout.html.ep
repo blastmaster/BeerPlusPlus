@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>beer++ | <%= $subtitle %></title>
+        <meta http-equiv="refresh" content="55;url=/">
 		%=stylesheet 'style.css'
 		% # link href='style.css' rel='stylesheet' type='text/css'
 	</head>
