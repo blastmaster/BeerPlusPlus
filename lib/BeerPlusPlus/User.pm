@@ -231,7 +231,7 @@ sub consume($;$) {
     my $self = shift;
 	my $time = shift || time;
 
-	push $self->{times}, $time;
+	push @{$self->{times}}, $time;
 	@{$self->{times}} = sort @{$self->{times}};
 	$self->persist();
 
