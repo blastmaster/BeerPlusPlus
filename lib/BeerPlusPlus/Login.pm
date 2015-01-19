@@ -64,7 +64,7 @@ sub register
 
 	return $self->render('register')
 			unless $self->check($password, $repetition);
-	
+
 	my $newpw = $self->uman->hash($password);
 	$self->user->change_password($newpw)
 			or $self->log->error("change password failed");
@@ -79,7 +79,7 @@ sub check
 	my $password = shift;
 	my $repetition = shift;
 
-	return $password eq $repetition and length $password >= 8;
+	return $password eq $repetition && length $password >= 8;
 }
 
 sub logout
