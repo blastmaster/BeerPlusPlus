@@ -1,5 +1,5 @@
 <!-- vim:ft=html -->
-% layout 'basic';
+% layout 'logout';
 <div id="header" class="banner"><%= $byebye %>!</div>
 %= footer 'only_login'
 
