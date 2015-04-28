@@ -48,18 +48,14 @@ sub startup {
 	$r->post('/login')->to('login#index');
 	$r->get('/logout')->to('login#logout');
 
-	my $login = $r->under->to('login#is_auth');
-	# FIXME redirect to login if session is lost (e.g. after restart)
-#	$r = $r->under(sub {
-#			$self->redirect_to('/index') unless $self->{user};
-#	});
+	$r = $r->under->to('login#is_auth');
 
-    $login->post('/increment')->to('login#plusplus');
-    $login->post('/register')->to('login#register');
+    $r->post('/increment')->to('login#plusplus');
+    $r->post('/register')->to('login#register');
 
-	$login->get('/chpw' => sub { shift->render('register'); });
+	$r->get('/chpw' => sub { shift->render('register'); });
 
-    $login->get('/welcome' => sub {
+    $r->get('/welcome' => sub {
             my $self = shift;
 
             my $user = $self->user;
@@ -68,14 +64,14 @@ sub startup {
             my @timestamps = $user->get_timestamps();
             my $ts = localtime 0;
             $ts = localtime $timestamps[$#timestamps]
-                    if (defined @timestamps);
+                    if (@timestamps);
 
             my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
             $self->stash(last => $last);
             $self->render(template => 'welcome', format => 'html');
         });
 
-    $login->get('/denied' => sub {
+    $r->get('/denied' => sub {
             my $self = shift;
             $self->render(controller => 'denied', subtitle => "rin'tel'noc");
         });
