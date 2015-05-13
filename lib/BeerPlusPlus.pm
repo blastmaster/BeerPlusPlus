@@ -49,33 +49,32 @@ sub startup {
 	$r->get('/logout')->to('login#logout');
 
 	$r = $r->under->to('login#is_auth');
-	# FIXME redirect to login if session is lost (e.g. after restart)
-#	$r = $r->under(sub {
-#			$self->redirect_to('/index') unless $self->{user};
-#	});
 
     $r->post('/increment')->to('login#plusplus');
     $r->post('/register')->to('login#register');
 
 	$r->get('/chpw' => sub { shift->render('register'); });
 
-	$r->get('/welcome' => sub {
-			my $self = shift;
+    $r->get('/welcome' => sub {
+            my $self = shift;
 
-			my $user = $self->user;
-			$self->stash(user => $user->get_name());
-			$self->stash(count => $user->get_count());
-			my @timestamps = $user->get_timestamps();
-			my $ts = localtime $timestamps[0];
-			my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
-			$self->stash(last => $last);
-			$self->render(template => 'welcome', format => 'html');
-		});
+            my $user = $self->user;
+            $self->stash(user => $user->get_name());
+            $self->stash(count => $user->get_count());
+            my @timestamps = $user->get_timestamps();
+            my $ts = localtime 0;
+            $ts = localtime $timestamps[$#timestamps]
+                    if (@timestamps);
 
-	$r->get('/denied' => sub {
-		my $self = shift;
-		$self->render(controller => 'denied', subtitle => "rin'tel'noc");
-	});
+            my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
+            $self->stash(last => $last);
+            $self->render(template => 'welcome', format => 'html');
+        });
+
+    $r->get('/denied' => sub {
+            my $self = shift;
+            $self->render(controller => 'denied', subtitle => "rin'tel'noc");
+        });
 
 	%reg_pages = $self->initialize_plugins();
 }

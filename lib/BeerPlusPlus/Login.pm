@@ -51,8 +51,10 @@ sub is_auth
 {
 	my $self = shift;
 
-	return 1 if $self->user->verify($self->session->{pass});
-	return $self->redirect_to('/index');
+	return 1 if defined $self->user && 
+            $self->user->verify($self->session->{pass});
+    $self->render('index');
+	return undef;
 }
 
 sub register
