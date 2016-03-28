@@ -77,9 +77,7 @@ sub get_last_plusplus {
 	my $user = shift;
 
 	my @timestamps = $user->get_timestamps();
-	my $ts = localtime 0;
-	$ts = localtime $timestamps[$#timestamps]
-			if (@timestamps);
+	my $ts = localtime (@timestamps ? $timestamps[-1] : 0);
 
 	my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
 
