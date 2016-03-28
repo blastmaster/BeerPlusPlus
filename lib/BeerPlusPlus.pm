@@ -44,37 +44,37 @@ sub startup {
 	my $r = $self->routes;
 
 	$r->any('/')->to('login#login');
-    $r->get('/index')->to('login#login');
+	$r->get('/index')->to('login#login');
 	$r->post('/login')->to('login#index');
 	$r->get('/logout')->to('login#logout');
 
 	$r = $r->under->to('login#is_auth');
 
-    $r->post('/increment')->to('login#plusplus');
-    $r->post('/register')->to('login#register');
+	$r->post('/increment')->to('login#plusplus');
+	$r->post('/register')->to('login#register');
 
 	$r->get('/chpw' => sub { shift->render('register'); });
 
-    $r->get('/welcome' => sub {
-            my $self = shift;
+	$r->get('/welcome' => sub {
+			my $self = shift;
 
-            my $user = $self->user;
-            $self->stash(user => $user->get_name());
-            $self->stash(count => $user->get_count());
-            my @timestamps = $user->get_timestamps();
-            my $ts = localtime 0;
-            $ts = localtime $timestamps[$#timestamps]
-                    if (@timestamps);
+			my $user = $self->user;
+			$self->stash(user => $user->get_name());
+			$self->stash(count => $user->get_count());
+			my @timestamps = $user->get_timestamps();
+			my $ts = localtime 0;
+			$ts = localtime $timestamps[$#timestamps]
+					if (@timestamps);
 
-            my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
-            $self->stash(last => $last);
-            $self->render(template => 'welcome', format => 'html');
-        });
+			my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
+			$self->stash(last => $last);
+			$self->render(template => 'welcome', format => 'html');
+	});
 
-    $r->get('/denied' => sub {
-            my $self = shift;
-            $self->render(controller => 'denied', subtitle => "rin'tel'noc");
-        });
+	$r->get('/denied' => sub {
+			my $self = shift;
+			$self->render(controller => 'denied', subtitle => "rin'tel'noc");
+	});
 
 	%reg_pages = $self->initialize_plugins();
 }
