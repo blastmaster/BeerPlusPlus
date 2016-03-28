@@ -16,6 +16,7 @@ use BeerPlusPlus::User;
 use Data::Printer;
 
 use Time::Piece;
+use Time::Seconds;
 
 
 my $LOG = Mojo::Log->new();
@@ -78,8 +79,20 @@ sub get_last_plusplus {
 
 	my @timestamps = $user->get_timestamps();
 	my $ts = localtime (@timestamps ? $timestamps[-1] : 0);
+	my $now = localtime;
 
-	my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
+	my $last;
+	if ($ts->dmy eq $now->dmy or $ts+3*ONE_HOUR > $now) {
+		$last = $ts->strftime('at %H:%M');
+	} elsif (($ts+ONE_DAY)->dmy() eq $now->dmy()) {
+		$last = $ts->strftime('yesterday, %H:%M');
+	} elsif ((my $diff = $now - $ts) <= 3*ONE_DAY) {
+		$last = sprintf '%d days ago, %s', $diff->days, $ts->strftime('%H:%M');
+	} elsif ($ts->year == $now->year) {
+		$last = $ts->strftime('on %d.%m., %H:%M');
+	} else {
+		$last = $ts->strftime('on %d.%m.%Y, %H:%M');
+	}
 
 	return $last;
 }

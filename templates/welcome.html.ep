@@ -14,7 +14,7 @@
 				<td align="right"><%= $count %></td>
 			</tr>
 			<tr>
-				<td align="left">Last ++ on <%= $last %></td>
+				<td align="left">Last ++ <%= $last %></td>
 				<!--td width="50%"><%=submit_button '++', id => 'inc', class => 'banner', onclick => 'alert("Shal Met!")' %></td-->
 				<td align="right"><%=submit_button '++', id => 'inc', class => 'banner', style => 'text-align: right' %></td>
 			</tr>
