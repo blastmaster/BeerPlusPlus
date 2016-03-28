@@ -61,13 +61,7 @@ sub startup {
 			my $user = $self->user;
 			$self->stash(user => $user->get_name());
 			$self->stash(count => $user->get_count());
-			my @timestamps = $user->get_timestamps();
-			my $ts = localtime 0;
-			$ts = localtime $timestamps[$#timestamps]
-					if (@timestamps);
-
-			my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
-			$self->stash(last => $last);
+			$self->stash(last => get_last_plusplus($user));
 			$self->render(template => 'welcome', format => 'html');
 	});
 
@@ -77,6 +71,19 @@ sub startup {
 	});
 
 	%reg_pages = $self->initialize_plugins();
+}
+
+sub get_last_plusplus {
+	my $user = shift;
+
+	my @timestamps = $user->get_timestamps();
+	my $ts = localtime 0;
+	$ts = localtime $timestamps[$#timestamps]
+			if (@timestamps);
+
+	my $last = sprintf "%s, %s", $ts->dmy('.'), $ts->hms();
+
+	return $last;
 }
 
 sub create_footer_link($$$) {
