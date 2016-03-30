@@ -25,19 +25,22 @@ sub get_elapsed_in_words {
 	my $then = localtime (shift);
 	my $now  = localtime (shift || time);
 
+	my $t_day = _truncate_hours($then);
+	my $n_day = _truncate_hours($now);
+
 	my $prefix;
 
 	# Same day OR next day within 3h
-	if ($then->dmy eq $now->dmy or $then + 3*ONE_HOUR > $now) {
+	if ($t_day == $n_day or $then + 3*ONE_HOUR > $now) {
 		$prefix = 'at'
 	}
 	# Next day
-	elsif (($then+ONE_DAY)->dmy eq $now->dmy) {
+	elsif ($t_day + ONE_DAY == $n_day) {
 		$prefix = 'yesterday,';
 	}
 	# Up to 3 days after
-	elsif ((my $diff = $now - $then) <= 3*ONE_DAY) {
-		$prefix = sprintf '%d days ago,', $diff->days +0.5;
+	elsif ((my $diff = $n_day - $t_day) <= 3*ONE_DAY) {
+		$prefix = sprintf '%d days ago,', $diff->days;
 	}
 	# Same year
 	elsif ($then->year == $now->year) {
@@ -48,6 +51,11 @@ sub get_elapsed_in_words {
 	}
 
 	return $then->strftime("$prefix %R");
+}
+
+# Truncates hours to 00:00:00
+sub _truncate_hours {
+	return localtime->strptime(shift->strftime('%D00:00'), '%D%R');
 }
 
 
