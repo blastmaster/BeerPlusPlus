@@ -13,7 +13,7 @@ BEGIN { use_ok('BeerPlusPlus::Util::Format') }
 use Time::Piece;
 
 
-my $PARSE_FORMAT = '%d-%m-%Y %H:%M:%S';
+my $PARSE_FORMAT = '%d-%m-%Y %T';
 
 
 test_get_elapsed_in_words(

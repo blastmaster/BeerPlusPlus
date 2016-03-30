@@ -47,7 +47,7 @@ sub get_elapsed_in_words {
 		$prefix = 'on %d.%m.%y,';
 	}
 
-	return $then->strftime("$prefix %H:%M");
+	return $then->strftime("$prefix %R");
 }
 
 
