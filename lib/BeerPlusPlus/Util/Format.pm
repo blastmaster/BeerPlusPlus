@@ -21,6 +21,10 @@ use Time::Piece;
 use Time::Seconds;
 
 
+my $MAX_HOURS_AGO = 3 * ONE_HOUR;
+my $MAX_DAYS_AGO  = 3 * ONE_DAY;
+
+
 sub get_elapsed_in_words {
 	my $then = localtime (shift);
 	my $now  = localtime (shift || time);
@@ -31,7 +35,7 @@ sub get_elapsed_in_words {
 	my $prefix;
 
 	# Same day OR next day within 3h
-	if ($t_day == $n_day or $then + 3*ONE_HOUR > $now) {
+	if ($t_day == $n_day or $then + $MAX_HOURS_AGO > $now) {
 		$prefix = 'at'
 	}
 	# Next day
@@ -39,7 +43,7 @@ sub get_elapsed_in_words {
 		$prefix = 'yesterday,';
 	}
 	# Up to 3 days after
-	elsif ((my $diff = $n_day - $t_day) <= 3*ONE_DAY) {
+	elsif ((my $diff = $n_day - $t_day) <= $MAX_DAYS_AGO) {
 		$prefix = sprintf '%d days ago,', $diff->days;
 	}
 	# Same year
