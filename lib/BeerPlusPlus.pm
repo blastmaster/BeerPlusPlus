@@ -12,6 +12,7 @@ use Carp;
 
 use BeerPlusPlus::Plugin;
 use BeerPlusPlus::User;
+use BeerPlusPlus::Util::Format;
 
 use Data::Printer;
 
@@ -80,24 +81,7 @@ sub get_last_plusplus {
 	my @timestamps = $user->get_timestamps();
 
 	return "" unless @timestamps;
-
-	my $ts = localtime $timestamps[-1];
-	my $now = localtime;
-
-	my $last;
-	if ($ts->dmy eq $now->dmy or $ts+3*ONE_HOUR > $now) {
-		$last = $ts->strftime('at %H:%M');
-	} elsif (($ts+ONE_DAY)->dmy() eq $now->dmy()) {
-		$last = $ts->strftime('yesterday, %H:%M');
-	} elsif ((my $diff = $now - $ts) <= 3*ONE_DAY) {
-		$last = sprintf '%d days ago, %s', $diff->days, $ts->strftime('%H:%M');
-	} elsif ($ts->year == $now->year) {
-		$last = $ts->strftime('on %d.%m., %H:%M');
-	} else {
-		$last = $ts->strftime('on %d.%m.%Y, %H:%M');
-	}
-
-	return sprintf "Last ++ %s", $last;
+	return sprintf "Last ++ %s", get_elapsed_in_words($timestamps[-1], time);
 }
 
 sub create_footer_link($$$) {
