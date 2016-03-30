@@ -12,6 +12,10 @@ BEGIN { unshift @INC, "$FindBin::Bin/lib" }
 # $USERDIR =~ s/^\Q$ENV{PWD}\E/./; # relative path
 # mkdir $USERDIR and say "info: created directory $USERDIR" unless -d $USERDIR;
 
+use Cwd 'abs_path';
+use File::Basename;
+use BeerPlusPlus::Database;
+$BeerPlusPlus::Database::DATADIR = abs_path(dirname($0) . "/db");
 
 # Start command line interface for application
 require Mojolicious::Commands;
