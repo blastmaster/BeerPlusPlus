@@ -81,7 +81,7 @@ sub get_last_plusplus {
 	my @timestamps = $user->get_timestamps();
 
 	return "" unless @timestamps;
-	return sprintf "Last ++ %s", get_elapsed_in_words($timestamps[-1], time);
+	return sprintf "Last ++ %s", get_elapsed_in_words($timestamps[-1]);
 }
 
 sub create_footer_link($$$) {

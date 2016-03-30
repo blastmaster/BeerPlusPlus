@@ -22,8 +22,8 @@ use Time::Seconds;
 
 
 sub get_elapsed_in_words {
-	my $then = localtime shift;
-	my $now  = localtime shift;
+	my $then = localtime (shift);
+	my $now  = localtime (shift || time);
 
 	my $info;
 	if ($then->dmy eq $now->dmy or $then+3*ONE_HOUR > $now) {
