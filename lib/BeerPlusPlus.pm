@@ -78,7 +78,10 @@ sub get_last_plusplus {
 	my $user = shift;
 
 	my @timestamps = $user->get_timestamps();
-	my $ts = localtime (@timestamps ? $timestamps[-1] : 0);
+
+	return "" unless @timestamps;
+
+	my $ts = localtime $timestamps[-1];
 	my $now = localtime;
 
 	my $last;
@@ -94,7 +97,7 @@ sub get_last_plusplus {
 		$last = $ts->strftime('on %d.%m.%Y, %H:%M');
 	}
 
-	return $last;
+	return sprintf "Last ++ %s", $last;
 }
 
 sub create_footer_link($$$) {
