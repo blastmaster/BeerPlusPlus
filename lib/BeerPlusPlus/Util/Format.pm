@@ -25,20 +25,29 @@ sub get_elapsed_in_words {
 	my $then = localtime (shift);
 	my $now  = localtime (shift || time);
 
-	my $info;
-	if ($then->dmy eq $now->dmy or $then+3*ONE_HOUR > $now) {
-		$info = $then->strftime('at %H:%M');
-	} elsif (($then+ONE_DAY)->dmy() eq $now->dmy()) {
-		$info = $then->strftime('yesterday, %H:%M');
-	} elsif ((my $diff = $now - $then) <= 3*ONE_DAY) {
-		$info = sprintf '%d days ago, %s', $diff->days, $then->strftime('%H:%M');
-	} elsif ($then->year == $now->year) {
-		$info = $then->strftime('on %d.%m., %H:%M');
-	} else {
-		$info = $then->strftime('on %d.%m.%Y, %H:%M');
+	my $prefix;
+
+	# Same day OR next day within 3h
+	if ($then->dmy eq $now->dmy or $then + 3*ONE_HOUR > $now) {
+		$prefix = 'at'
+	}
+	# Next day
+	elsif (($then+ONE_DAY)->dmy eq $now->dmy) {
+		$prefix = 'yesterday,';
+	}
+	# Up to 3 days after
+	elsif ((my $diff = $now - $then) <= 3*ONE_DAY) {
+		$prefix = sprintf '%d days ago,', $diff->days +0.5;
+	}
+	# Same year
+	elsif ($then->year == $now->year) {
+		$prefix = 'on %d.%m.,';
+	}
+	else {
+		$prefix = 'on %d.%m.%y,';
 	}
 
-	return $info;
+	return $then->strftime("$prefix %H:%M");
 }
 
 
